@@ -1,4 +1,3 @@
-name: Admin - Bump Minor Version
 on:
   workflow_call:
     secrets:

@@ -1,4 +1,3 @@
-name: Release - Verify
 on:
   workflow_call:
     secrets:
