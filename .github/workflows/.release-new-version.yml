@@ -1,0 +1,33 @@
+name: Release - New Version
+on:
+  workflow_call:
+    secrets:
+      KUNGFU_GITHUB_TOKEN:
+        required: true
+      AWS_US_ACCESS_KEY_ID:
+        required: true
+      AWS_US_SECRET_ACCESS_KEY:
+        required: true
+      AWS_CN_ACCESS_KEY_ID:
+        required: true
+      AWS_CN_SECRET_ACCESS_KEY:
+        required: true
+
+jobs:
+  bump:
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup NPM registry
+        uses: actions/setup-node@v2
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@kungfu-trader'
+
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
