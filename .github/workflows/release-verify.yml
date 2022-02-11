@@ -17,3 +17,6 @@ jobs:
   verify:
     # report status for branch protection rule
     needs: try
+    steps:
+      - name: report
+        run: echo verified
