@@ -141,6 +141,7 @@ jobs:
             !**/build/stage/**/*.yaml
 
   verify:
+    if: ${{ always() }}
     needs: [prepare, build]
     runs-on: ubuntu-20.04
     steps:
