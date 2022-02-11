@@ -11,5 +11,8 @@ jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
     uses: ./.github/workflows/.release-new-version.yml
+    with:
+      publish-aws-ci: false
+      publish-aws-user: false
     secrets:
-      KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

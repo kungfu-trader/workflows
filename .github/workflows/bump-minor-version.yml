@@ -11,4 +11,4 @@ jobs:
     if: ${{ github.event.pull_request.merged }}
     uses: ./.github/workflows/.bump-minor-version.yml
     secrets:
-      KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

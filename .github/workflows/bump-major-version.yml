@@ -12,4 +12,4 @@ jobs:
     if: ${{ github.event.inputs.confirm  == 'confirm' }}
     uses: ./.github/workflows/.bump-major-version.yml
     secrets:
-      KUNGFU_GITHUB_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
