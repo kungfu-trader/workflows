@@ -12,4 +12,4 @@ jobs:
   verify:
     uses: ./.github/workflows/.release-verify.yml
     with:
-      prebuild: false
+      prebuild: true
