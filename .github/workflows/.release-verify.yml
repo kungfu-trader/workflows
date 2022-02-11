@@ -22,6 +22,12 @@ on:
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.2"
         type: string
+      publish-aws-ci:
+        default: true
+        type: boolean
+      publish-aws-user:
+        default: true
+        type: boolean
       aws-ci-region:
         default: "us-east-1"
         type: string
@@ -155,7 +161,7 @@ jobs:
           path: "github-artifacts"
 
       - name: Configure AWS Crendentials (CI)
-        if: ${{ secrets.AWS_CI_ACCESS_KEY_ID && secrets.AWS_CI_SECRET_ACCESS_KEY}}
+        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
@@ -163,7 +169,7 @@ jobs:
           aws-region: ${{ inputs.aws-ci-region }}
 
       - name: Publish Prebuilt to AWS (CI)
-        if: ${{ secrets.AWS_CI_ACCESS_KEY_ID && secrets.AWS_CI_SECRET_ACCESS_KEY}}
+        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -172,7 +178,7 @@ jobs:
           no-comment: "true"
 
       - name: Configure AWS Crendentials (User)
-        if: ${{ secrets.AWS_USER_ACCESS_KEY_ID && secrets.AWS_USER_SECRET_ACCESS_KEY}}
+        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
@@ -180,7 +186,7 @@ jobs:
           aws-region: ${{ inputs.aws-user-region }}
 
       - name: Publish Prebuilt to AWS (User)
-        if: ${{ secrets.AWS_USER_ACCESS_KEY_ID && secrets.AWS_USER_SECRET_ACCESS_KEY}}
+        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
