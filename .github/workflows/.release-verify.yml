@@ -4,6 +4,12 @@ on:
       prebuild:
         default: true
         type: boolean
+      node-version:
+        default: "14"
+        type: string
+      python-version:
+        default: "3.9"
+        type: string
       enable-linux:
         default: true
         type: boolean
@@ -27,12 +33,6 @@ on:
         type: string
       bucket-staging-user:
         default: "kungfu-prebuilt-staging"
-        type: string
-      node-version:
-        default: "14"
-        type: string
-      python-version:
-        default: "3.9"
         type: string
     secrets:
       AWS_CI_ACCESS_KEY_ID:
