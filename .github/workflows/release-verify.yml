@@ -13,5 +13,3 @@ jobs:
     uses: ./.github/workflows/.release-verify.yml
     with:
       prebuild: false
-    secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
