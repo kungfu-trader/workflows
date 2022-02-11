@@ -13,3 +13,5 @@ jobs:
     uses: ./.github/workflows/.release-verify.yml
     with:
       prebuild: true
+      publish-aws-ci: false
+      publish-aws-user: false
