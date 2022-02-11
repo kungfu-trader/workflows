@@ -25,7 +25,6 @@ on:
       bucket-staging-ci:
         default: "kungfu-prebuilt-staging"
         type: string
-        type: string
       bucket-staging-user:
         default: "kungfu-prebuilt-staging"
         type: string
