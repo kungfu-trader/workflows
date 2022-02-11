@@ -4,6 +4,12 @@ on:
       node-version:
         default: "14"
         type: string
+      publish-github-npm:
+        default: true
+        type: boolean
+      publish-npmjs:
+        default: false
+        type: boolean
       publish-aws-ci:
         default: true
         type: boolean
@@ -31,6 +37,8 @@ on:
     secrets:
       GITHUB_PUSH_TOKEN:
         required: true
+      NPM_PUSH_TOKEN:
+        required: false
       AWS_CI_ACCESS_KEY_ID:
         required: false
       AWS_CI_SECRET_ACCESS_KEY:
@@ -55,8 +63,15 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
-          scope: "@${{github.repository_owner}}"
+          scope: "@kungfu-trader"
           cache: "yarn"
+
+      - name: Setup Node.js registry scope
+        if: ${{ inputs.publish-github-npm }}
+        uses: actions/setup-node@v2
+        with:
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@${{github.repository_owner}}"
 
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
@@ -98,8 +113,29 @@ jobs:
           bucket-release: ${{ inputs.bucket-release-user }}
 
       - name: Publish New Version To GitHub
-        if: ${{ github.event.pull_request.merged }}
+        if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"
+
+      - name: Setup NPM registry
+        if: ${{ inputs.publish-npmjs }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup NPM registry for owner
+        if: ${{ inputs.publish-npmjs }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+          scope: "@${{github.repository_owner}}"
+
+      - name: Publish to NPM Packages
+        if: ${{ inputs.publish-npmjs }}
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUSH_TOKEN }}
