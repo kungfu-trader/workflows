@@ -9,7 +9,11 @@ on:
       - main
 
 jobs:
-  verify:
+  try:
     uses: ./.github/workflows/.release-verify.yml
     with:
       prebuild: false
+  
+  verify:
+    # report status for branch protection rule
+    needs: try
