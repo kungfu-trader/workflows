@@ -114,7 +114,7 @@ jobs:
 
       - name: Setup pipenv
         if: ${{ !matrix.container }}
-        run: pip install pipenv
+        run: pipx install pipenv
 
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
