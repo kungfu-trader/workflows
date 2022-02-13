@@ -10,6 +10,12 @@ on:
       python-version:
         default: "3.9"
         type: string
+      use-pipenv:
+        default: false
+        type: boolean
+      use-poetry:
+        default: false
+        type: boolean
       enable-linux:
         default: true
         type: boolean
@@ -112,9 +118,13 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
-      - name: Setup pipenv
-        if: ${{ !matrix.container }}
+      - name: Install pipenv
+        if: ${{ inputs.use-pipenv && !matrix.container }}
         run: pipx install pipenv
+
+      - name: Install poetry
+        if: ${{ inputs.use-poetry && !matrix.container }}
+        run: pipx install poetry
 
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
