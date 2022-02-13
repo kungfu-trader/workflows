@@ -112,6 +112,10 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
+      - name: Setup pipenv
+        if: ${{ !matrix.container }}
+        run: pip install pipenv
+
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
         with:
