@@ -9,7 +9,6 @@ on:
 
 jobs:
   release:
-    if: ${{ github.event.pull_request.merged }}
     uses: ./.github/workflows/.release-new-version.yml
     with:
       publish-aws-ci: false

@@ -8,7 +8,6 @@ on:
 
 jobs:
   bump:
-    if: ${{ github.event.pull_request.merged }}
     uses: ./.github/workflows/.bump-minor-version.yml
     secrets:
       GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
