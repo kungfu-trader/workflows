@@ -50,8 +50,6 @@ on:
         default: "kungfu-prebuilt-staging"
         type: string
     secrets:
-      NODE_AUTH_TOKEN:
-        required: false
       AWS_CI_ACCESS_KEY_ID:
         required: false
       AWS_CI_SECRET_ACCESS_KEY:
@@ -59,6 +57,9 @@ on:
       AWS_USER_ACCESS_KEY_ID:
         required: false
       AWS_USER_SECRET_ACCESS_KEY:
+        required: false
+      NODE_AUTH_TOKEN:
+        default: ${{ secrets.GITHUB_TOKEN }}
         required: false
 
 jobs:
