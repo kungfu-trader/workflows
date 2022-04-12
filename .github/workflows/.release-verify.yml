@@ -58,6 +58,8 @@ on:
         required: false
       AWS_USER_SECRET_ACCESS_KEY:
         required: false
+      NODE_AUTH_TOKEN:
+        required: false
 
 jobs:
   prepare:
@@ -92,6 +94,7 @@ jobs:
     continue-on-error: ${{ !matrix.enabled }}
     container: ${{ matrix.container }}
     env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
       USE_HARD_LINKS: false
     steps:
       - name: Checkout
