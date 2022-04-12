@@ -10,5 +10,5 @@ jobs:
     steps:
       - uses: kungfu-trader/action-purge-artifacts@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
           expire-in: 14days
