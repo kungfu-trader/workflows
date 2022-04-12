@@ -1,4 +1,4 @@
-name: Schedule - Clean Up GitHub Storage
+name: Schedule - Purge GitHub Artifacts
 on:
   push:
   schedule:
@@ -8,7 +8,7 @@ jobs:
   delete-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: kolpav/purge-artifacts-action@v1
+      - uses: kungfu-trader/action-purge-artifacts@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           expire-in: 14days
