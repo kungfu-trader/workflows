@@ -1,4 +1,5 @@
 name: Release - New Version
+
 on:
   pull_request:
     types: [closed]
@@ -7,20 +8,10 @@ on:
       - release/v*/v*
 
 jobs:
-  bump:
-    if: ${{ github.event.pull_request.merged }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup NPM registry
-        uses: actions/setup-node@v2
-        with:
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@kungfu-trader'
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+  release:
+    uses: ./.github/workflows/.release-new-version.yml
+    with:
+      publish-aws-ci: false
+      publish-aws-user: false
+    secrets:
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

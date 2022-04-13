@@ -9,13 +9,6 @@ on:
 
 jobs:
   bump:
-    if: ${{ github.event.inputs.confirm  == 'confirm' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+    uses: ./.github/workflows/.bump-major-version.yml
+    secrets:
+      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

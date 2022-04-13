@@ -1,23 +1,224 @@
 on:
   workflow_call:
+    inputs:
+      prebuild:
+        default: true
+        type: boolean
+      node-version:
+        default: "14"
+        type: string
+      python-version:
+        default: "3.9"
+        type: string
+      use-pipenv:
+        default: false
+        type: boolean
+      use-poetry:
+        default: false
+        type: boolean
+      enable-linux:
+        default: true
+        type: boolean
+      enable-macos:
+        default: true
+        type: boolean
+      enable-windows:
+        default: true
+        type: boolean
+      builder-container:
+        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.2"
+        type: string
+      publish-github-npm:
+        default: true
+        type: boolean
+      publish-aws-ci:
+        default: true
+        type: boolean
+      publish-aws-user:
+        default: true
+        type: boolean
+      aws-ci-region:
+        default: "us-east-1"
+        type: string
+      aws-user-region:
+        default: "cn-northwest-1"
+        type: string
+      bucket-staging-ci:
+        default: "kungfu-prebuilt-staging"
+        type: string
+      bucket-staging-user:
+        default: "kungfu-prebuilt-staging"
+        type: string
     secrets:
-      KUNGFU_GITHUB_TOKEN:
-        required: true
-      AWS_US_ACCESS_KEY_ID:
-        required: true
-      AWS_US_SECRET_ACCESS_KEY:
-        required: true
-      AWS_CN_ACCESS_KEY_ID:
-        required: true
-      AWS_CN_SECRET_ACCESS_KEY:
-        required: true
+      AWS_CI_ACCESS_KEY_ID:
+        required: false
+      AWS_CI_SECRET_ACCESS_KEY:
+        required: false
+      AWS_USER_ACCESS_KEY_ID:
+        required: false
+      AWS_USER_SECRET_ACCESS_KEY:
+        required: false
+      NODE_AUTH_TOKEN:
+        required: false
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
+  prepare:
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Set Pull Request Title
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
+
+  build:
+    if: ${{ inputs.prebuild }}
+    needs: prepare
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: "Linux"
+            container: ${{ inputs.builder-container }}
+            enabled: ${{ inputs.enable-linux }}
+          - os: macos-11
+            name: "MacOS"
+            enabled: ${{ inputs.enable-macos }}
+          - os: windows-2019
+            name: "Windows"
+            enabled: ${{ inputs.enable-windows }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ !matrix.enabled }}
+    container: ${{ matrix.container }}
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
+      USE_HARD_LINKS: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@kungfu-trader"
+          cache: "yarn"
+
+      - name: Setup Node.js registry scope
+        if: ${{ inputs.publish-github-npm }}
+        uses: actions/setup-node@v2
+        with:
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@${{github.repository_owner}}"
+
+      - name: Setup Python environment
+        if: ${{ !matrix.container }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install pipenv
+        if: ${{ inputs.use-pipenv && !matrix.container }}
+        run: pipx install pipenv
+
+      - name: Install poetry
+        if: ${{ inputs.use-poetry && !matrix.container }}
+        run: pipx install poetry
+
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Setup Build Environment
+        run: yarn --network-timeout=1000000 install --frozen-lockfile
+
+      - name: Build
+        run: yarn run build
+
+      - name: Upload Build Info
+        uses: actions/upload-artifact@v2
+        if: ${{ failure() }}
+        with:
+          name: "Build-Info-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            *.lock
+            **/*.lock
+            **/build/**/*.log
+            **/build/**/*.txt
+          if-no-files-found: ignore
+
+      - name: Package Artifacts
+        run: yarn run package
+
+      - name: Upload Prebuilt
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            **/build/stage/*/v*/v*/*.*
+            !**/build/stage/**/.*
+            !**/build/stage/**/*.yml
+            !**/build/stage/**/*.yaml
+
+  verify:
+    if: ${{ always() }}
+    needs: [prepare, build]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Bump Version
+        if: ${{ inputs.prebuild }}
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Download Artifacts
+        if: ${{ inputs.prebuild }}
+        uses: actions/download-artifact@v2
+        with:
+          path: "github-artifacts"
+
+      - name: Configure AWS Crendentials (CI)
+        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-ci-region }}
+
+      - name: Publish Prebuilt to AWS (CI)
+        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts-path: "github-artifacts"
+          bucket-staging: ${{ inputs.bucket-staging-ci }}
+          no-comment: "true"
+
+      - name: Configure AWS Crendentials (User)
+        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-user-region }}
+
+      - name: Publish Prebuilt to AWS (User)
+        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts-path: "github-artifacts"
+          bucket-staging: ${{ inputs.bucket-staging-user }}
 
       - name: Verify Version
         uses: kungfu-trader/action-bump-version@v3

@@ -1,7 +1,7 @@
 on:
   workflow_call:
     secrets:
-      KUNGFU_GITHUB_TOKEN:
+      GITHUB_PUSH_TOKEN:
         required: true
 
 jobs:
@@ -15,4 +15,4 @@ jobs:
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
