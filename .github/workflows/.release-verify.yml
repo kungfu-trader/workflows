@@ -165,7 +165,7 @@ jobs:
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
             !**/build/stage/**/*.yaml
-            !**/build/stage/**/win-unpacked/**/*.*
+            !**/build/stage/**/win-unpacked/**
 
   verify:
     if: ${{ always() }}
