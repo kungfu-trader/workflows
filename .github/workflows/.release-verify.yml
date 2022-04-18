@@ -157,7 +157,7 @@ jobs:
         run: yarn run package
 
       - name: Clear Unpacked for Windows
-        if: ${{ matrix.name == "Windows" }}
+        if: ${{ matrix.name == 'Windows' }}
         uses: JesseTG/rm@v1.0.2
         with:
           path: "**/build/stage/v*/v*/win-unpacked"
