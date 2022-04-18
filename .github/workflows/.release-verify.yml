@@ -156,11 +156,10 @@ jobs:
       - name: Package Artifacts
         run: yarn run package
 
-      - name: Clear Unpacked for Windows
+      - name: Clean Up Unpacked
+        # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
         if: ${{ matrix.name == 'Windows' }}
-        uses: JesseTG/rm@v1.0.2
-        with:
-          path: "**/build/stage/v*/v*/win-unpacked"
+        run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Force -Recurse
 
       - name: Upload Prebuilt
         uses: actions/upload-artifact@v2
