@@ -156,6 +156,12 @@ jobs:
       - name: Package Artifacts
         run: yarn run package
 
+      - name: Clear Unpacked for Windows
+        if: ${{ matrix.name == "Windows" }}
+        uses: JesseTG/rm@v1.0.2
+        with:
+          path: "**/build/stage/v*/v*/win-unpacked"
+
       - name: Upload Prebuilt
         uses: actions/upload-artifact@v2
         with:
@@ -165,7 +171,6 @@ jobs:
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
             !**/build/stage/**/*.yaml
-            !**/build/stage/**/win-unpacked/**
 
   verify:
     if: ${{ always() }}
