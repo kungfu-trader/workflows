@@ -91,16 +91,17 @@ jobs:
             name: "Windows"
             enabled: ${{ inputs.enable-windows }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ !matrix.enabled }}
     container: ${{ matrix.container }}
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
       USE_HARD_LINKS: false
     steps:
       - name: Checkout
+        if: ${{ matrix.enabled }}
         uses: actions/checkout@v2
 
       - name: Setup Node.js environment
+        if: ${{ matrix.enabled }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ inputs.node-version }}
@@ -109,41 +110,44 @@ jobs:
           cache: "yarn"
 
       - name: Setup Node.js registry scope
-        if: ${{ inputs.publish-github-npm }}
+        if: ${{ matrix.enabled && inputs.publish-github-npm }}
         uses: actions/setup-node@v2
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
 
       - name: Setup Python environment
-        if: ${{ !matrix.container }}
+        if: ${{ matrix.enabled && !matrix.container }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ inputs.python-version }}
 
       - name: Install pipenv
-        if: ${{ inputs.use-pipenv && !matrix.container }}
+        if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
         run: pipx install pipenv
 
       - name: Install poetry
-        if: ${{ inputs.use-poetry && !matrix.container }}
+        if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
         run: pipx install poetry
 
       - name: Bump Version
+        if: ${{ matrix.enabled }}
         uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "prebuild"
 
       - name: Setup Build Environment
+        if: ${{ matrix.enabled }}
         run: yarn --network-timeout=1000000 install --frozen-lockfile
 
       - name: Build
+        if: ${{ matrix.enabled }}
         run: yarn run build
 
       - name: Upload Build Info
         uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
+        if: ${{ matrix.enabled && failure() }}
         with:
           name: "Build-Info-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
@@ -154,14 +158,16 @@ jobs:
           if-no-files-found: ignore
 
       - name: Package Artifacts
+        if: ${{ matrix.enabled }}
         run: yarn run package
 
       - name: Clean Up Unpacked
         # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
-        if: ${{ matrix.name == 'Windows' }}
+        if: ${{ matrix.enabled && matrix.name == 'Windows' }}
         run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Force -Recurse
 
       - name: Upload Prebuilt
+        if: ${{ matrix.enabled }}
         uses: actions/upload-artifact@v2
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
