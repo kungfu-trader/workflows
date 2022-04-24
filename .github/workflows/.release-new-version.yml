@@ -34,6 +34,24 @@ on:
       bucket-release-user:
         default: "kungfu-prebuilt"
         type: string
+      clean-release-ci:
+        default: false
+        type: boolean
+      clean-release-user:
+        default: false
+        type: boolean
+      cloudfront-id-ci:
+        default: ""
+        type: string
+      cloudfront-id-user:
+        default: ""
+        type: string
+      cloudfront-paths-ci:
+        default: "/*"
+        type: string
+      cloudfront-paths-user:
+        default: "/*"
+        type: string
     secrets:
       GITHUB_PUSH_TOKEN:
         required: true
@@ -94,6 +112,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           bucket-staging: ${{ inputs.bucket-staging-ci }}
           bucket-release: ${{ inputs.bucket-release-ci }}
+          clean-release: ${{ inputs.clean-release-ci }}
+          cloudfront-id: ${{ inputs.cloudfront-id-ci }}
+          cloudfront-paths: ${{ inputs.cloudfront-paths-ci }}
           no-comment: 'true'
 
       - name: Configure AWS Crendentials (User)
@@ -111,6 +132,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           bucket-staging: ${{ inputs.bucket-staging-user }}
           bucket-release: ${{ inputs.bucket-release-user }}
+          clean-release: ${{ inputs.clean-release-user }}
+          cloudfront-id: ${{ inputs.cloudfront-id-user }}
+          cloudfront-paths: ${{ inputs.cloudfront-paths-user }}
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
