@@ -107,7 +107,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (CI)
         if: ${{ inputs.publish-aws-ci }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-trader/action-publish-prebuilt@v2.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           bucket-staging: ${{ inputs.bucket-staging-ci }}
@@ -127,7 +127,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (User)
         if: ${{ inputs.publish-aws-user }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-trader/action-publish-prebuilt@v2.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           bucket-staging: ${{ inputs.bucket-staging-user }}
