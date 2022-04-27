@@ -52,6 +52,12 @@ on:
       bucket-staging-user:
         default: "kungfu-prebuilt-staging"
         type: string
+      preview-files:
+        default: ".*"
+        type: string
+      max-preview-links:
+        default: "32"
+        type: string
     secrets:
       AWS_CI_ACCESS_KEY_ID:
         required: false
@@ -241,6 +247,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-path: "github-artifacts"
           bucket-staging: ${{ inputs.bucket-staging-user }}
+          preview-files: ${{ inputs.preview-files }}
+          max-preview-links: ${{ inputs.max-preview-links }}
 
       - name: Verify Version
         uses: kungfu-trader/action-bump-version@v3
