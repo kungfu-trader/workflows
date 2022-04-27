@@ -37,6 +37,9 @@ on:
       publish-aws-user:
         default: true
         type: boolean
+      publish-versioning:
+        default: true
+        type: boolean
       aws-ci-region:
         default: "us-east-1"
         type: string
@@ -166,8 +169,8 @@ jobs:
         if: ${{ matrix.enabled && matrix.name == 'Windows' }}
         run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Force -Recurse
 
-      - name: Upload Prebuilt
-        if: ${{ matrix.enabled }}
+      - name: Upload Prebuilt (with versions)
+        if: ${{ matrix.enabled && inputs.publish-versioning }}
         uses: actions/upload-artifact@v2
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
@@ -176,6 +179,14 @@ jobs:
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
             !**/build/stage/**/*.yaml
+
+      - name: Upload Prebuilt (without versions)
+        if: ${{ matrix.enabled && !inputs.publish-versioning }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            **/build/stage/**/.*
 
   verify:
     if: ${{ always() }}
