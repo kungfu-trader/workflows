@@ -186,7 +186,7 @@ jobs:
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
-            **/build/stage/**/.*
+            **/build/stage/**/*.*
 
   verify:
     if: ${{ always() }}
