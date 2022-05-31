@@ -186,13 +186,21 @@ jobs:
         if: ${{ matrix.enabled }}
         run: yarn run package
 
-      - name: Clean Up Unpacked
+      - name: Clean Up Unpacked 1
+        # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
+        if: ${{ matrix.enabled && matrix.name == 'Windows' }}
+        run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -WhatIf
+
+      - name: Clean Up Unpacked 2
         # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
         if: ${{ matrix.enabled && matrix.name == 'Windows' }}
         continue-on-error: true
-        run: |
-          Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -WhatIf
-          Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -Force
+        run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -Force
+
+      - name: Clean Up Unpacked 3
+        # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
+        if: ${{ matrix.enabled && matrix.name == 'Windows' }}
+        run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -WhatIf
 
       - name: Upload Prebuilt (with versions)
         if: ${{ matrix.enabled && inputs.publish-versioning }}
@@ -201,7 +209,6 @@ jobs:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
             **/build/stage/*/v*/v*/*.*
-            !**/build/stage/*/v*/v*/win-unpacked
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
             !**/build/stage/**/*.yaml
