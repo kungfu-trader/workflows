@@ -25,6 +25,12 @@ on:
       enable-windows:
         default: true
         type: boolean
+      build-timeout-minutes:
+        default: 60
+        type: number
+      max-build-attempts:
+        default: 3
+        type: number
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.2"
         type: string
@@ -159,8 +165,8 @@ jobs:
         if: ${{ matrix.enabled }}
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 120
-          max_attempts: 3
+          timeout_minutes: ${{ inputs.build-timeout-minutes }}
+          max_attempts: ${{ inputs.max-build-attempts }}
           command: yarn run build
 
       - name: Upload Build Info
