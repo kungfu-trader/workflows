@@ -29,7 +29,7 @@ on:
         default: 60
         type: number
       max-build-attempts:
-        default: 3
+        default: 1
         type: number
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.2"
@@ -189,6 +189,7 @@ jobs:
       - name: Clean Up Unpacked
         # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
         if: ${{ matrix.enabled && matrix.name == 'Windows' }}
+        continue-on-error: true
         run: |
           Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -WhatIf
           Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -Force
@@ -200,6 +201,7 @@ jobs:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
             **/build/stage/*/v*/v*/*.*
+            !**/build/stage/*/v*/v*/win-unpacked
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
             !**/build/stage/**/*.yaml
