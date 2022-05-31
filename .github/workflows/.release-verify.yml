@@ -175,10 +175,7 @@ jobs:
         # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
         if: ${{ matrix.enabled && matrix.name == 'Windows' }}
         run: |
-          Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force
-          Echo ====
           Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -WhatIf
-          Echo ====
           Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -Force
 
       - name: Upload Prebuilt (with versions)
