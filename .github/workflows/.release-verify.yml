@@ -25,6 +25,12 @@ on:
       enable-windows:
         default: true
         type: boolean
+      build-timeout-minutes:
+        default: 60
+        type: number
+      max-build-attempts:
+        default: 1
+        type: number
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.2"
         type: string
@@ -148,11 +154,20 @@ jobs:
 
       - name: Setup Build Environment
         if: ${{ matrix.enabled }}
-        run: yarn --network-timeout=1000000 install --frozen-lockfile
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: yarn --network-timeout=1000000 install --frozen-lockfile
+          new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
 
       - name: Build
         if: ${{ matrix.enabled }}
-        run: yarn run build
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: ${{ inputs.build-timeout-minutes }}
+          max_attempts: ${{ inputs.max-build-attempts }}
+          command: yarn run build
 
       - name: Upload Build Info
         uses: actions/upload-artifact@v2
@@ -170,12 +185,6 @@ jobs:
       - name: Package Artifacts
         if: ${{ matrix.enabled }}
         run: yarn run package
-
-      - name: Clean Up Unpacked
-        # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
-        if: ${{ matrix.enabled && matrix.name == 'Windows' }}
-        continue-on-error: true
-        run: Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Force -Recurse
 
       - name: Upload Prebuilt (with versions)
         if: ${{ matrix.enabled && inputs.publish-versioning }}
