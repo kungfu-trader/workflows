@@ -29,7 +29,7 @@ on:
         default: 60
         type: number
       max-build-attempts:
-        default: 3
+        default: 1
         type: number
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.2"
@@ -185,13 +185,6 @@ jobs:
       - name: Package Artifacts
         if: ${{ matrix.enabled }}
         run: yarn run package
-
-      - name: Clean Up Unpacked
-        # Need this hack until this bug got fixed: https://github.com/actions/upload-artifact/issues/240
-        if: ${{ matrix.enabled && matrix.name == 'Windows' }}
-        run: |
-          Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -WhatIf
-          Get-ChildItem -Path . -Filter 'win-unpacked' -Recurse -ErrorAction SilentlyContinue -Force | Remove-Item -Recurse -Force
 
       - name: Upload Prebuilt (with versions)
         if: ${{ matrix.enabled && inputs.publish-versioning }}
