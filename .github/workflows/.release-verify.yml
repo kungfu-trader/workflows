@@ -102,7 +102,7 @@ jobs:
           - os: macos-11
             name: "MacOS"
             enabled: ${{ inputs.enable-macos }}
-          - os: windows-2019
+          - os: windows-2022
             name: "Windows"
             enabled: ${{ inputs.enable-windows }}
     runs-on: ${{ matrix.os }}
