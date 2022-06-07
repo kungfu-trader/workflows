@@ -2,7 +2,7 @@ name: Release - Verify
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, synchronize]
     branches:
       - alpha/*/*
       - release/*/*
@@ -13,6 +13,7 @@ jobs:
     uses: ./.github/workflows/.release-verify.yml
     with:
       prebuild: false
+      format-check: false
   
   verify:
     # report status for branch protection rule
