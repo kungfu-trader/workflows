@@ -89,6 +89,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
+      - name: Check Format
+        uses: kungfu-trader/action-check-format@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     if: ${{ inputs.prebuild }}
     needs: prepare
