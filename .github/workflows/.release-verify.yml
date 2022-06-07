@@ -89,6 +89,23 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "yarn"
+
+      - name: Install prettier
+        run: npm install -g prettier
+      
+      - name: Setup Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install black
+        run: pipx install black
+
       - name: Check Format
         uses: kungfu-trader/action-check-format@v1.0-alpha
         with:
