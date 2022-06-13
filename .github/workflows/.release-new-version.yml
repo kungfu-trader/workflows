@@ -82,7 +82,6 @@ jobs:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
           scope: "@kungfu-trader"
-          cache: "yarn"
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.publish-github-npm }}
