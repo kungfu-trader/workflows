@@ -10,6 +10,9 @@ on:
       python-version:
         default: "3.9"
         type: string
+      format-check:
+        default: true
+        type: boolean
       use-pipenv:
         default: false
         type: boolean
@@ -89,6 +92,32 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
+      - name: Setup Node.js environment
+        if: ${{ inputs.format-check }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install prettier
+        if: ${{ inputs.format-check }}
+        run: npm install -g prettier
+      
+      - name: Setup Python environment
+        if: ${{ inputs.format-check }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install black
+        if: ${{ inputs.format-check }}
+        run: pipx install black
+
+      # - name: Check Format
+      #   if: ${{ inputs.format-check }}
+      #   uses: kungfu-trader/action-check-format@v1.0-alpha
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     if: ${{ inputs.prebuild }}
     needs: prepare
@@ -122,7 +151,6 @@ jobs:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
           scope: "@kungfu-trader"
-          cache: "yarn"
 
       - name: Setup Node.js registry scope
         if: ${{ matrix.enabled && inputs.publish-github-npm }}
