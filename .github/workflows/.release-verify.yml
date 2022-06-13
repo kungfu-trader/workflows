@@ -97,7 +97,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ inputs.node-version }}
-          cache: "yarn"
 
       - name: Install prettier
         if: ${{ inputs.format-check }}
@@ -113,11 +112,11 @@ jobs:
         if: ${{ inputs.format-check }}
         run: pipx install black
 
-      - name: Check Format
-        if: ${{ inputs.format-check }}
-        uses: kungfu-trader/action-check-format@v1.0-alpha
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Check Format
+      #   if: ${{ inputs.format-check }}
+      #   uses: kungfu-trader/action-check-format@v1.0-alpha
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     if: ${{ inputs.prebuild }}
@@ -152,7 +151,6 @@ jobs:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
           scope: "@kungfu-trader"
-          cache: "yarn"
 
       - name: Setup Node.js registry scope
         if: ${{ matrix.enabled && inputs.publish-github-npm }}
