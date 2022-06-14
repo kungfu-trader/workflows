@@ -112,11 +112,11 @@ jobs:
         if: ${{ inputs.format-check }}
         run: pipx install black
 
-      # - name: Check Format
-      #   if: ${{ inputs.format-check }}
-      #   uses: kungfu-trader/action-check-format@v1.0-alpha
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check Format
+        if: ${{ inputs.format-check }}
+        uses: kungfu-trader/action-check-format@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     if: ${{ inputs.prebuild }}

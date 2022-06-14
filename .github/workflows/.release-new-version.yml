@@ -162,3 +162,9 @@ jobs:
         run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUSH_TOKEN }}
+
+      - name: Rollback When Fail
+        if: ${{ failure() }}
+        uses: kungfu-trader/action-rollback-publish@v1
+        with:
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
