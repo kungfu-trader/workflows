@@ -13,7 +13,7 @@ jobs:
     uses: ./.github/workflows/.release-verify.yml
     with:
       prebuild: false
-      format-check: false
+      check-format: false
   
   verify:
     # report status for branch protection rule
