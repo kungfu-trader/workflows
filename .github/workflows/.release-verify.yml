@@ -10,7 +10,7 @@ on:
       python-version:
         default: "3.9"
         type: string
-      format-check:
+      check-format:
         default: true
         type: boolean
       use-pipenv:
@@ -93,27 +93,27 @@ jobs:
           action: "verify"
 
       - name: Setup Node.js environment
-        if: ${{ inputs.format-check }}
+        if: ${{ inputs.check-format }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ inputs.node-version }}
 
-      - name: Install prettier
-        if: ${{ inputs.format-check }}
-        run: npm install -g prettier
+      - name: Install Node.js tools
+        if: ${{ inputs.check-format }}
+        run: npm install -g prettier wsrun
       
       - name: Setup Python environment
-        if: ${{ inputs.format-check }}
+        if: ${{ inputs.check-format }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ inputs.python-version }}
 
-      - name: Install black
-        if: ${{ inputs.format-check }}
+      - name: Install Python tools
+        if: ${{ inputs.check-format }}
         run: pipx install black
 
       - name: Check Format
-        if: ${{ inputs.format-check }}
+        if: ${{ inputs.check-format }}
         uses: kungfu-trader/action-check-format@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
