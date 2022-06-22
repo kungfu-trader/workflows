@@ -100,7 +100,7 @@ jobs:
 
       - name: Install Node.js tools
         if: ${{ inputs.check-format }}
-        run: npm install -g prettier wsrun
+        run: npm install -g prettier@~2.7.1 wsrun@5.2.4
       
       - name: Setup Python environment
         if: ${{ inputs.check-format }}
