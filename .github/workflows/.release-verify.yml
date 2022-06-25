@@ -171,7 +171,7 @@ jobs:
 
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
-        if: ${{ matrix.name == "Windows" }}
+        if: matrix.name == "Windows"
         with:
           arch: x64
 
