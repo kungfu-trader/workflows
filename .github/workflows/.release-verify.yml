@@ -101,8 +101,8 @@ jobs:
       - name: Install Node.js tools
         if: ${{ inputs.check-format }}
         run: |
-          npm install -g prettier@~2.7.1
-          npm install -g wsrun@~5.2.4
+          npm install -g prettier@~2.7.0
+          npm install -g wsrun@^5.0.0
           npm install -g glob@^8.0.0
           npm link glob
       
@@ -168,6 +168,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ inputs.python-version }}
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        if: ${{ matrix.name == "Windows" }}
+        with:
+          arch: x64
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
