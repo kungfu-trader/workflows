@@ -94,12 +94,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
-    
-      - name: Setup Java environment
-        if: ${{ inputs.check-format }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ inputs.java-version }}
 
       - name: Setup Node.js environment
         if: ${{ inputs.check-format }}
@@ -162,6 +156,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ inputs.java-version }}
+          distribution: 'temurin'
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
