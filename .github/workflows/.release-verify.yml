@@ -10,6 +10,9 @@ on:
       python-version:
         default: "3.9"
         type: string
+      java-version:
+        default: "8"
+        type: string
       check-format:
         default: true
         type: boolean
@@ -91,6 +94,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
+    
+      - name: Setup Java environment
+        if: ${{ inputs.check-format }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ inputs.java-version }}
 
       - name: Setup Node.js environment
         if: ${{ inputs.check-format }}
@@ -147,6 +156,12 @@ jobs:
       - name: Checkout
         if: ${{ matrix.enabled }}
         uses: actions/checkout@v2
+
+      - name: Setup Java environment
+        if: ${{ matrix.enabled && !matrix.container }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ inputs.java-version }}
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
