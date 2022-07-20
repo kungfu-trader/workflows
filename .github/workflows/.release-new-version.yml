@@ -91,7 +91,7 @@ jobs:
           scope: "@${{github.repository_owner}}"
 
       - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
+        uses: kungfu-trader/action-bump-version@v3.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "prebuild"
@@ -137,7 +137,7 @@ jobs:
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
-        uses: kungfu-trader/action-bump-version@v3
+        uses: kungfu-trader/action-bump-version@v3.0-alpha
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"
