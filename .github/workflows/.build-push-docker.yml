@@ -16,7 +16,7 @@ jobs:
 
       - name: Bump Version
         id: bump-version
-        uses: kungfu-trader/action-bump-version@v3.0-alpha
+        uses: kungfu-trader/action-bump-version@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "prebuild"
