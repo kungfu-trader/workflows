@@ -142,7 +142,7 @@ jobs:
         if: ${{ inputs.check-format }}
         run: |
           pipx install black~=22.3.0
-          pipx install poetry
+          pipx install poetry~=1.1.14
 
       - name: Check Format
         if: ${{ inputs.check-format }}
