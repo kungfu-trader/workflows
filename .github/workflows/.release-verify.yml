@@ -4,72 +4,95 @@ on:
       prebuild:
         default: true
         type: boolean
+        required: false
       node-version:
         default: "14"
         type: string
+        required: false
       python-version:
         default: "3.9"
         type: string
+        required: false
       java-version:
         default: "8"
         type: string
+        required: false
       check-format:
         default: true
         type: boolean
+        required: false
       use-pipenv:
         default: false
         type: boolean
+        required: false
       use-poetry:
         default: false
         type: boolean
+        required: false
       enable-linux:
         default: true
         type: boolean
+        required: false
       enable-macos:
         default: true
         type: boolean
+        required: false
       enable-windows:
         default: true
         type: boolean
+        required: false
       build-timeout-minutes:
         default: 60
         type: number
+        required: false
       max-build-attempts:
         default: 1
         type: number
+        required: false
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.4"
         type: string
+        required: false
       publish-github-npm:
         default: true
         type: boolean
+        required: false
       publish-aws-ci:
         default: true
         type: boolean
+        required: false
       publish-aws-user:
         default: true
         type: boolean
+        required: false
       publish-versioning:
         default: true
         type: boolean
+        required: false
       aws-ci-region:
         default: "us-east-1"
         type: string
+        required: false
       aws-user-region:
         default: "cn-northwest-1"
         type: string
+        required: false
       bucket-staging-ci:
         default: "kungfu-prebuilt-staging"
         type: string
+        required: false
       bucket-staging-user:
         default: "kungfu-prebuilt-staging"
         type: string
+        required: false
       preview-files:
         default: ".*"
         type: string
+        required: false
       max-preview-links:
         default: "32"
         type: string
+        required: false
     secrets:
       AWS_CI_ACCESS_KEY_ID:
         required: false
@@ -117,7 +140,9 @@ jobs:
 
       - name: Install Python tools
         if: ${{ inputs.check-format }}
-        run: pipx install black~=22.3.0
+        run: |
+          pipx install black~=22.3.0
+          pipx install poetry~=1.1.14
 
       - name: Check Format
         if: ${{ inputs.check-format }}

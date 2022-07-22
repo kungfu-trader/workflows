@@ -4,54 +4,71 @@ on:
       node-version:
         default: "14"
         type: string
+        required: false
       publish-github-npm:
         default: true
         type: boolean
+        required: false
       publish-npmjs:
         default: false
         type: boolean
+        required: false
       publish-aws-ci:
         default: true
         type: boolean
+        required: false
       publish-aws-user:
         default: true
         type: boolean
+        required: false
       aws-ci-region:
         default: "us-east-1"
         type: string
+        required: false
       aws-user-region:
         default: "cn-northwest-1"
         type: string
+        required: false
       bucket-staging-ci:
         default: "kungfu-prebuilt-staging"
         type: string
+        required: false
       bucket-staging-user:
         default: "kungfu-prebuilt-staging"
         type: string
+        required: false
       bucket-release-ci:
         default: "kungfu-prebuilt"
         type: string
+        required: false
       bucket-release-user:
         default: "kungfu-prebuilt"
         type: string
+        required: false
       clean-release-ci:
         default: false
         type: boolean
+        required: false
       clean-release-user:
         default: false
         type: boolean
+        required: false
       cloudfront-id-ci:
         default: ""
         type: string
+        required: false
       cloudfront-id-user:
         default: ""
         type: string
+        required: false
       cloudfront-paths-ci:
         default: "/*"
         type: string
+        required: false
       cloudfront-paths-user:
         default: "/*"
         type: string
+        required: false
     secrets:
       GITHUB_PUSH_TOKEN:
         required: true
