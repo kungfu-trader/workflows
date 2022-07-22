@@ -144,11 +144,6 @@ jobs:
           pipx install black~=22.3.0
           pipx install poetry~=1.1.14
 
-      - name: Setup Python tools
-        if: ${{ inputs.check-format }}
-        run: |
-          poetry cache clear --all pypi
-
       - name: Check Format
         if: ${{ inputs.check-format }}
         uses: kungfu-trader/action-check-format@v1.0-alpha
