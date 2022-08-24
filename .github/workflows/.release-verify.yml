@@ -131,9 +131,9 @@ jobs:
       - name: Install Node.js tools
         if: ${{ inputs.check-format }}
         run: |
-          npm install -g prettier@~2.7.0
-          npm install -g wsrun@^5.0.0
-          npm install -g glob@^8.0.0
+          npm install -g --location=global prettier@~2.7.0
+          npm install -g --location=global wsrun@^5.0.0
+          npm install -g --location=global glob@^8.0.0
           npm link glob
       
       - name: Setup Python environment
