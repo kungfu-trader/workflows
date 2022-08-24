@@ -123,6 +123,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ inputs.node-version }}
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@kungfu-trader"
 
       - name: Install Node.js tools
         if: ${{ inputs.check-format }}
