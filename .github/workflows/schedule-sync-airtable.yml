@@ -7,6 +7,6 @@ jobs:
   traversal-messages:
     runs-on: ubuntu-latest
     steps:
-      - uses: kungfu-trader/action-sync-airtable@v2.0.0-alpha.1
+      - uses: kungfu-trader/action-sync-airtable@v2.0-alpha
         with:
           token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
