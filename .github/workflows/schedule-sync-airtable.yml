@@ -1,7 +1,7 @@
 name: Schedule - Sync GitHub Messages to Airtable
 on:
   schedule:
-    - cron: '30 * * * *'
+    - cron: '0,20,40 * * * *'
 
 jobs:
   traversal-messages:
