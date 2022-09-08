@@ -182,6 +182,6 @@ jobs:
 
       - name: Rollback Check
         if: ${{ failure() }}
-        uses: kungfu-trader/action-rollback-release@v1.0-dev
+        uses: kungfu-trader/action-rollback-release@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
