@@ -10,3 +10,5 @@ jobs:
       - uses: kungfu-trader/action-sync-airtable@v2.0-alpha
         with:
           token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          base: ${{ secrets.AIRTABLE_BASE_ID }}
