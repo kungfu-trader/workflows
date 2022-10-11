@@ -5,6 +5,8 @@ on:
         required: true
         type: string
     secrets:
+      GITHUB_PUSH_TOKEN:
+        required: true
       DOCKER_HUB_USERNAME:
         required: true
       DOCKER_HUB_PASSWORD:
@@ -31,7 +33,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ inputs.image-name }}
-          tag-sha: true
+          tags: ${{ inputs.image-name }}:latest, ${{ inputs.image-name }}:${{ steps.bump-version.outputs.version }}, ${{ steps.docker-meta.outputs.tags }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
