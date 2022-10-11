@@ -11,7 +11,7 @@ on:
         required: true
 
 jobs:
-  build:
+  release:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
 
@@ -55,3 +55,9 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker-build.outputs.digest }}
+
+      - name: Publish New Version To GitHub
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          action: "postbuild"
