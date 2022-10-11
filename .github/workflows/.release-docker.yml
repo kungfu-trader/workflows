@@ -28,7 +28,7 @@ jobs:
 
       - name: Docker meta
         id: docker-meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: docker/metadata-action@v4
         with:
           images: ${{ inputs.image-name }}
           tag-sha: true
