@@ -9,6 +9,10 @@ on:
         default: true
         type: boolean
         required: false
+      image-name:
+        default: ""
+        type: string
+        required: false
       node-version:
         default: "14"
         type: string
@@ -89,6 +93,10 @@ on:
       AWS_USER_ACCESS_KEY_ID:
         required: false
       AWS_USER_SECRET_ACCESS_KEY:
+        required: false
+      DOCKER_HUB_USERNAME:
+        required: false
+      DOCKER_HUB_PASSWORD:
         required: false
 
 jobs:
