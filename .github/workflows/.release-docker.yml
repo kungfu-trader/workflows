@@ -4,9 +4,16 @@ on:
       image-name:
         required: true
         type: string
+    secrets:
+      GITHUB_PUSH_TOKEN:
+        required: true
+      DOCKER_HUB_USERNAME:
+        required: true
+      DOCKER_HUB_PASSWORD:
+        required: true
 
 jobs:
-  build:
+  release:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-20.04
 
@@ -23,10 +30,10 @@ jobs:
 
       - name: Docker meta
         id: docker-meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: docker/metadata-action@v4
         with:
           images: ${{ inputs.image-name }}
-          tag-sha: true
+          tags: ${{ inputs.image-name }}:latest, ${{ inputs.image-name }}:${{ steps.bump-version.outputs.version }}, ${{ steps.docker-meta.outputs.tags }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -50,3 +57,9 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker-build.outputs.digest }}
+
+      - name: Publish New Version To GitHub
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          action: "postbuild"

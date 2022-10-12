@@ -108,6 +108,7 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-20.04
+    container: ${{ inputs.builder-container }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -117,32 +118,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
-
-      - name: Setup Node.js environment
-        if: ${{ inputs.check-format }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ inputs.node-version }}
-
-      - name: Install Node.js tools
-        if: ${{ inputs.check-format }}
-        run: |
-          npm install -g prettier@~2.7.0
-          npm install -g wsrun@^5.0.0
-          npm install -g glob@^8.0.0
-          npm link glob
-      
-      - name: Setup Python environment
-        if: ${{ inputs.check-format }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ inputs.python-version }}
-
-      - name: Install Python tools
-        if: ${{ inputs.check-format }}
-        run: |
-          pipx install black~=22.3.0
-          pipx install poetry~=1.1.14
 
       - name: Check Format
         if: ${{ inputs.check-format }}
