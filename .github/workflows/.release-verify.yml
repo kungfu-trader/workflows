@@ -50,7 +50,7 @@ on:
         type: number
         required: false
       builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.4"
+        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.5"
         type: string
         required: false
       publish-github-npm:
