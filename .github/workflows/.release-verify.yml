@@ -1,23 +1,313 @@
 on:
   workflow_call:
+    inputs:
+      prebuild:
+        default: true
+        type: boolean
+        required: false
+      node-version:
+        default: "14"
+        type: string
+        required: false
+      python-version:
+        default: "3.9"
+        type: string
+        required: false
+      java-version:
+        default: "8"
+        type: string
+        required: false
+      check-format:
+        default: true
+        type: boolean
+        required: false
+      use-pipenv:
+        default: false
+        type: boolean
+        required: false
+      use-poetry:
+        default: false
+        type: boolean
+        required: false
+      enable-linux:
+        default: true
+        type: boolean
+        required: false
+      enable-macos:
+        default: true
+        type: boolean
+        required: false
+      enable-windows:
+        default: true
+        type: boolean
+        required: false
+      build-timeout-minutes:
+        default: 60
+        type: number
+        required: false
+      max-build-attempts:
+        default: 1
+        type: number
+        required: false
+      builder-container:
+        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.7"
+        type: string
+        required: false
+      publish-github-npm:
+        default: true
+        type: boolean
+        required: false
+      publish-aws-ci:
+        default: true
+        type: boolean
+        required: false
+      publish-aws-user:
+        default: true
+        type: boolean
+        required: false
+      publish-versioning:
+        default: true
+        type: boolean
+        required: false
+      aws-ci-region:
+        default: "us-east-1"
+        type: string
+        required: false
+      aws-user-region:
+        default: "cn-northwest-1"
+        type: string
+        required: false
+      bucket-staging-ci:
+        default: "kungfu-prebuilt-staging"
+        type: string
+        required: false
+      bucket-staging-user:
+        default: "kungfu-prebuilt-staging"
+        type: string
+        required: false
+      preview-files:
+        default: ".*"
+        type: string
+        required: false
+      max-preview-links:
+        default: "32"
+        type: string
+        required: false
     secrets:
-      KUNGFU_GITHUB_TOKEN:
-        required: true
-      AWS_US_ACCESS_KEY_ID:
-        required: true
-      AWS_US_SECRET_ACCESS_KEY:
-        required: true
-      AWS_CN_ACCESS_KEY_ID:
-        required: true
-      AWS_CN_SECRET_ACCESS_KEY:
-        required: true
+      AWS_CI_ACCESS_KEY_ID:
+        required: false
+      AWS_CI_SECRET_ACCESS_KEY:
+        required: false
+      AWS_USER_ACCESS_KEY_ID:
+        required: false
+      AWS_USER_SECRET_ACCESS_KEY:
+        required: false
+      NODE_AUTH_TOKEN:
+        required: false
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
+  prepare:
+    runs-on: ubuntu-20.04
+    container: ${{ inputs.builder-container }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Set Pull Request Title
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
+
+      - name: Check Format
+        if: ${{ inputs.check-format }}
+        uses: kungfu-trader/action-check-format@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    if: ${{ inputs.prebuild }}
+    needs: prepare
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: "Linux"
+            container: ${{ inputs.builder-container }}
+            enabled: ${{ inputs.enable-linux }}
+          - os: macos-11
+            name: "MacOS"
+            enabled: ${{ inputs.enable-macos }}
+          - os: windows-2022
+            name: "Windows"
+            enabled: ${{ inputs.enable-windows }}
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
+      USE_HARD_LINKS: false
+    steps:
+      - name: Checkout
+        if: ${{ matrix.enabled }}
+        uses: actions/checkout@v2
+
+      - name: Setup Java environment
+        if: ${{ matrix.enabled && !matrix.container }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: 'temurin'
+
+      - name: Setup Node.js environment
+        if: ${{ matrix.enabled }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@kungfu-trader"
+
+      - name: Setup Node.js registry scope
+        if: ${{ matrix.enabled && inputs.publish-github-npm }}
+        uses: actions/setup-node@v2
+        with:
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@${{github.repository_owner}}"
+
+      - name: Setup Python environment
+        if: ${{ matrix.enabled && !matrix.container }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        if: matrix.name == 'Windows'
+        with:
+          arch: x64
+
+      - name: Install pipenv
+        if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
+        run: pipx install pipenv==2022.8.15
+
+      - name: Install poetry
+        if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
+        run: pipx install poetry==1.1.14
+
+      - name: Bump Version
+        if: ${{ matrix.enabled }}
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Setup Build Environment
+        if: ${{ matrix.enabled }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: yarn --network-timeout=1000000 install --frozen-lockfile
+          new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
+
+      - name: Build
+        if: ${{ matrix.enabled }}
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: ${{ inputs.build-timeout-minutes }}
+          max_attempts: ${{ inputs.max-build-attempts }}
+          command: yarn run build
+
+      - name: Upload Build Info
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.enabled && failure() }}
+        with:
+          name: "Build-Info-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            *.log
+            *.lock
+            **/*.lock
+            **/build/**/*.log
+            **/build/**/*.txt
+          if-no-files-found: ignore
+
+      - name: Package Artifacts
+        if: ${{ matrix.enabled }}
+        run: yarn run package
+
+      - name: Upload Prebuilt (with versions)
+        if: ${{ matrix.enabled && inputs.publish-versioning }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            **/build/stage/*/v*/v*/*.*
+            !**/build/stage/**/.*
+            !**/build/stage/**/*.yml
+            !**/build/stage/**/*.yaml
+
+      - name: Upload Prebuilt (without versions)
+        if: ${{ matrix.enabled && !inputs.publish-versioning }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            **/build/stage/**/*.*
+
+  verify:
+    if: ${{ always() }}
+    needs: [prepare, build]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Bump Version
+        if: ${{ inputs.prebuild }}
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Download Artifacts
+        if: ${{ inputs.prebuild }}
+        uses: actions/download-artifact@v2
+        with:
+          path: "github-artifacts"
+
+      - name: Configure AWS Crendentials (CI)
+        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-ci-region }}
+
+      - name: Publish Prebuilt to AWS (CI)
+        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts-path: "github-artifacts"
+          bucket-staging: ${{ inputs.bucket-staging-ci }}
+          no-comment: "true"
+
+      - name: Configure AWS Crendentials (User)
+        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-user-region }}
+
+      - name: Publish Prebuilt to AWS (User)
+        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts-path: "github-artifacts"
+          bucket-staging: ${{ inputs.bucket-staging-user }}
+          preview-files: ${{ inputs.preview-files }}
+          max-preview-links: ${{ inputs.max-preview-links }}
 
       - name: Verify Version
         uses: kungfu-trader/action-bump-version@v3

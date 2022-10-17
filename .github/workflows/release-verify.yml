@@ -1,21 +1,24 @@
 name: Release - Verify
+
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, synchronize]
     branches:
       - alpha/*/*
       - release/*/*
       - main
 
 jobs:
+  try:
+    uses: ./.github/workflows/.release-verify.yml
+    with:
+      prebuild: false
+      check-format: false
+  
   verify:
-    runs-on: ubuntu-latest
+    # report status for branch protection rule
+    needs: try
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Verify Version
-        uses: kungfu-trader/action-bump-version@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          action: "verify"
+      - name: report
+        run: echo verified
