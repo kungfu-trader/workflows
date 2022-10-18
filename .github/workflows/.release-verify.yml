@@ -21,13 +21,21 @@ on:
         default: true
         type: boolean
         required: false
-      use-pipenv:
-        default: false
-        type: boolean
+      builder-container:
+        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.8"
+        type: string
         required: false
-      use-poetry:
-        default: false
-        type: boolean
+      build-runner-linux:
+        default: ubuntu-20.04
+        type: string
+        required: false
+      build-runner-macos:
+        default: macos-11
+        type: string
+        required: false
+      build-runner-windows:
+        default: windows-2022
+        type: string
         required: false
       enable-linux:
         default: true
@@ -41,6 +49,14 @@ on:
         default: true
         type: boolean
         required: false
+      use-pipenv:
+        default: false
+        type: boolean
+        required: false
+      use-poetry:
+        default: false
+        type: boolean
+        required: false
       build-timeout-minutes:
         default: 60
         type: number
@@ -48,10 +64,6 @@ on:
       max-build-attempts:
         default: 1
         type: number
-        required: false
-      builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.1.8"
-        type: string
         required: false
       publish-github-npm:
         default: true
@@ -131,14 +143,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ${{ inputs.build-runner-linux }}
             name: "Linux"
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
-          - os: macos-11
+          - os: ${{ inputs.build-runner-macos }}
             name: "MacOS"
             enabled: ${{ inputs.enable-macos }}
-          - os: windows-2022
+          - os: ${{ inputs.build-runner-windows }}
             name: "Windows"
             enabled: ${{ inputs.enable-windows }}
     runs-on: ${{ matrix.os }}
