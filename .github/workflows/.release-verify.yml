@@ -133,7 +133,7 @@ jobs:
 
       - name: Check Format
         if: ${{ inputs.check-format }}
-        uses: kungfu-trader/action-check-format@v1.0-alpha
+        uses: kungfu-trader/action-check-format@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
