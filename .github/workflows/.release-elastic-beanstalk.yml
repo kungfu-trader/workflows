@@ -1,13 +1,13 @@
 on:
   workflow_call:
     inputs:
-      AWS_REGION:
+      aws-region:
         required: true
         type: string
-      EB_ENV_NAME:
+      eb-environment-name:
         required: true
         type: string
-      EB_APP_NAME:
+      eb-application-name:
         required: true
         type: string
     secrets:
@@ -40,11 +40,11 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
-          application_name: ${{inputs.EB_APP_NAME}}
-          environment_name: ${inputs.EB_ENV_NAME}}
+          application_name: ${{inputs.eb-application-name}}
+          environment_name: ${inputs.eb-environment-name}}
           version_label: ${{steps.bump_version.outputs.version}}
           version_description: ${{github.SHA}}
-          region: ${{inputs.AWS_REGION}}
+          region: ${{inputs.aws-region}}
           deployment_package: deploy.zip
           wait_for_environment_recovery: 120
 
