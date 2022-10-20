@@ -1,0 +1,42 @@
+
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - alpha/v*/v*
+      - release/v*/v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set branch-based environment variables
+        uses: iamtheyammer/branch-env-vars@v1.2.0
+        with:
+          bevOverwrite: true
+          ENV_NAME: |
+            dev/*/*:kungfu-trader-dev
+            alpha/*/*:kungfu-trader-alpha
+            release/*/*:kungfu-trader-prod
+          APP_NAME: 'kungfu-trader'
+          AWS_REGION: 'cn-northwest-1'
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
+          application_name: ${{env.APP_NAME}}
+          environment_name: ${{env.ENV_NAME}}
+          version_label: "ver-${{ github.sha }}"
+          version_description: ${{github.SHA}}
+          region: ${{env.AWS_REGION}}
+          deployment_package: deploy.zip
+          wait_for_environment_recovery: 120
