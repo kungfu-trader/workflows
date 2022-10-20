@@ -25,6 +25,13 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
 
+      - name: Bump Version
+        id: bump_version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
 
@@ -35,8 +42,14 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
           application_name: ${{env.APP_NAME}}
           environment_name: ${{env.ENV_NAME}}
-          version_label: "ver-${{ github.sha }}"
+          version_label: ${{steps.bump_version.outputs.version}}
           version_description: ${{github.SHA}}
           region: ${{env.AWS_REGION}}
           deployment_package: deploy.zip
           wait_for_environment_recovery: 120
+
+      - name: Publish New Version To GitHub
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          action: "postbuild"
