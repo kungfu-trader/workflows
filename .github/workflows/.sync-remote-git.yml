@@ -1,0 +1,30 @@
+on:
+  workflow_call:
+    inputs:
+      remote-url-host:
+        default: "git-codecommit.cn-northwest-1.amazonaws.com.cn/v1/repos"
+        type: string
+        required: false
+      remote-url-repo:
+        default: ""
+        type: string
+        required: true
+    secrets:
+      REMOTE_USER:
+        required: false
+      REMOTE_PASSWORD:
+        required: false
+
+jobs:
+  release:
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Publish to NPM Packages
+        if: ${{ inputs.publish-npmjs }}
+        run: |
+          git remote add peer "https://${{ secrets.REMOTE_USER }}:${{ secrets.REMOTE_PASSWORD }}@${{ inputs.remote-url-host }}/${{ inputs.remote-url-repo }}"
+          git push peer $${{ github.base_ref }}
