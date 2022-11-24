@@ -22,8 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Publish to NPM Packages
-        if: ${{ inputs.publish-npmjs }}
+      - name: Sync Remote Git Repo
         run: |
           git remote add peer "https://${{ secrets.REMOTE_USER }}:${{ secrets.REMOTE_PASSWORD }}@${{ inputs.remote-url-host }}/${{ inputs.remote-url-repo }}"
           git push peer $${{ github.base_ref }}
