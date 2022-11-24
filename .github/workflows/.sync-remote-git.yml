@@ -16,7 +16,9 @@ on:
     secrets:
       REMOTE_USER:
         required: false
-      REMOTE_PASSWORD:
+      REMOTE_CREDENTIAL:
+        # format: https://username:password@host
+        # run git locally with credential.helper=store and check ~/.git-credentials to get the value
         required: false
 
 jobs:
@@ -28,8 +30,8 @@ jobs:
 
       - name: Sync Remote Git Repo
         run: |
-          git config --global credential.helper "!f() { test \"$1\" = get && echo password=${{secrets.REMOTE_PASSWORD}}; }; f"
+          echo ${{secrets.REMOTE_CREDENTIAL}} >> ~/.git-credentials
+          git config --global credential.https://${{inputs.remote-host}}.helper store
           git config --global credential.https://${{inputs.remote-host}}.username ${{ secrets.REMOTE_USER }}
-          git config --global -l
           git remote add peer "https://${{inputs.remote-host}}/${{inputs.remote-path}}/${{inputs.remote-repo}}"
           git push peer ${{ github.ref }}:${{ github.ref }}
