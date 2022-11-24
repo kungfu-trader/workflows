@@ -1,11 +1,15 @@
 on:
   workflow_call:
     inputs:
-      remote-url-host:
-        default: "git-codecommit.cn-northwest-1.amazonaws.com.cn/v1/repos"
+      remote-host:
+        default: "git-codecommit.cn-northwest-1.amazonaws.com.cn"
         type: string
         required: false
-      remote-url-repo:
+      remote-path:
+        default: "v1/repos"
+        type: string
+        required: false
+      remote-repo:
         default: ""
         type: string
         required: true
@@ -24,5 +28,7 @@ jobs:
 
       - name: Sync Remote Git Repo
         run: |
-          git remote add peer "https://${{ secrets.REMOTE_USER }}:${{ secrets.REMOTE_PASSWORD }}@${{ inputs.remote-url-host }}/${{ inputs.remote-url-repo }}"
+          git config --global credential.helper "!f() { test \"$1\" = get && echo \"password=${{secrets.REMOTE_PASSWORD}}\"; }; f"
+          git config --global credential.https://${{inputs.remote-host}}.username ${{ secrets.REMOTE_USER }}
+          git remote add peer "https://${{inputs.remote-host}}/${{inputs.remote-path}}/${{inputs.remote-repo}}"
           git push peer ${{ github.ref }}:${{ github.ref }}
