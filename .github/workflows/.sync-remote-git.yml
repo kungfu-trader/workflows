@@ -13,6 +13,10 @@ on:
         default: ""
         type: string
         required: true
+      force:
+        default: false
+        type: boolean
+        required: false
     secrets:
       REMOTE_USER:
         required: false
@@ -26,13 +30,22 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Sync Remote Git Repo
+      - name: Fetch Remote Git Repo
         run: |
           echo ${{secrets.REMOTE_CREDENTIAL}} >> ~/.git-credentials
           git config --global credential.https://${{inputs.remote-host}}.helper store
           git config --global credential.https://${{inputs.remote-host}}.username ${{ secrets.REMOTE_USER }}
           git remote add peer "https://${{inputs.remote-host}}/${{inputs.remote-path}}/${{inputs.remote-repo}}"
           git fetch peer
-          git push --force peer ${{ github.ref_name }}
+      
+      - name: Push Remote Git Repo
+        if: ${{ !inputs.force }}
+        run: git push peer ${{ github.ref_name }}
+      
+      - name: Push Remote Git Repo (Force)
+        if: ${{ inputs.force }}
+        run: git push --force peer ${{ github.ref_name }}
