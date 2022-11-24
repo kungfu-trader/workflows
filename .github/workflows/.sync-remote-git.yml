@@ -34,4 +34,5 @@ jobs:
           git config --global credential.https://${{inputs.remote-host}}.helper store
           git config --global credential.https://${{inputs.remote-host}}.username ${{ secrets.REMOTE_USER }}
           git remote add peer "https://${{inputs.remote-host}}/${{inputs.remote-path}}/${{inputs.remote-repo}}"
+          git fetch peer
           git push peer ${{ github.ref }}:${{ github.ref }}
