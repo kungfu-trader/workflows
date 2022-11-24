@@ -25,4 +25,4 @@ jobs:
       - name: Sync Remote Git Repo
         run: |
           git remote add peer "https://${{ secrets.REMOTE_USER }}:${{ secrets.REMOTE_PASSWORD }}@${{ inputs.remote-url-host }}/${{ inputs.remote-url-repo }}"
-          git push peer ${{ github.ref }}
+          git push peer ${{ github.ref }}:${{ github.ref }}
