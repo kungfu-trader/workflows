@@ -28,7 +28,7 @@ jobs:
 
       - name: Sync Remote Git Repo
         run: |
-          git config --global credential.helper "!f() { test \"$1\" = get && echo \"password=${{secrets.REMOTE_PASSWORD}}\"; }; f"
+          git config --global credential.helper "!f() { test \"$1\" = get && echo password=${{secrets.REMOTE_PASSWORD}}; }; f"
           git config --global credential.https://${{inputs.remote-host}}.username ${{ secrets.REMOTE_USER }}
           git remote add peer "https://${{inputs.remote-host}}/${{inputs.remote-path}}/${{inputs.remote-repo}}"
           git push peer ${{ github.ref }}:${{ github.ref }}
