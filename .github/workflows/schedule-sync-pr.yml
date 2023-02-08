@@ -1,4 +1,4 @@
-name: Schedule - Sync GitHub Messages to Airtable
+name: Schedule - Sync GitHub Pull Request to Airtable
 on:
   watch:
     types: [started]
