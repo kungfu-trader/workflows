@@ -1,0 +1,14 @@
+name: Schedule - Sync GitHub Messages to Airtable
+on:
+  watch:
+    types: [started]
+
+jobs:
+  traversal-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kungfu-trader/action-sync-pr@v1
+        with:
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          base: ${{ secrets.AIRTABLE_BASE_ID }}
