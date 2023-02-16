@@ -105,6 +105,10 @@ on:
         default: "32"
         type: string
         required: false
+      list-dependencies:
+        default: false 
+        type: boolean
+        required: false
     secrets:
       AWS_CI_ACCESS_KEY_ID:
         required: false
@@ -115,6 +119,8 @@ on:
       AWS_USER_SECRET_ACCESS_KEY:
         required: false
       NODE_AUTH_TOKEN:
+        required: false
+      AIRTABLE_API_KEY:
         required: false
 
 jobs:
@@ -326,3 +332,5 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
+
+     
