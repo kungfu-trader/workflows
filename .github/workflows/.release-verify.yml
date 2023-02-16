@@ -333,4 +333,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
-     
+      - name: Find Dependencies
+        uses: kungfu-trader/action-package-dependency@v1
+        with:
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          list-dependencies: ${{ inputs.list-dependencies }}
