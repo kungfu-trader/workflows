@@ -120,6 +120,10 @@ on:
         required: false
       NODE_AUTH_TOKEN:
         required: false
+      AIRTABLE_API_KEY:
+        required: false
+      AIRTABLE_API_KEY_2:
+        required: false
 
 jobs:
   prepare:
@@ -335,4 +339,5 @@ jobs:
         uses: kungfu-trader/action-package-dependency@v1.0-alpha
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          apiKey2: ${{ secrets.AIRTABLE_API_KEY_2 }}
           list-dependencies: ${{ inputs.list-dependencies }}
