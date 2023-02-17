@@ -120,8 +120,6 @@ on:
         required: false
       NODE_AUTH_TOKEN:
         required: false
-      AIRTABLE_API_KEY:
-        required: false
 
 jobs:
   prepare:
