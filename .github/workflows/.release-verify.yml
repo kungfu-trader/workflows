@@ -336,7 +336,7 @@ jobs:
           action: "verify"
 
       - name: Find Dependencies
-        uses: kungfu-trader/action-package-dependency@v1.0.0-alpha.5
+        uses: kungfu-trader/action-package-dependency@v1.0-alpha
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           apiKey2: ${{ secrets.AIRTABLE_API_KEY_2 }}
