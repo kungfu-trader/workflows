@@ -2,7 +2,7 @@ on:
   workflow_call:
     inputs:
       node-version:
-        default: "14"
+        default: "16"
         type: string
         required: false
       publish-github-npm:
@@ -161,14 +161,14 @@ jobs:
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: 'https://registry.npmjs.org'
 
       - name: Setup NPM registry for owner
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: 'https://registry.npmjs.org'
