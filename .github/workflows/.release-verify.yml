@@ -161,7 +161,7 @@ jobs:
     steps:
       - name: Checkout
         if: ${{ matrix.enabled }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Java environment
         if: ${{ matrix.enabled && !matrix.container }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
@@ -180,7 +180,7 @@ jobs:
 
       - name: Setup Node.js registry scope
         if: ${{ matrix.enabled && inputs.publish-github-npm }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
