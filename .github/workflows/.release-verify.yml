@@ -6,7 +6,7 @@ on:
         type: boolean
         required: false
       node-version:
-        default: "14"
+        default: "16"
         type: string
         required: false
       python-version:
@@ -123,7 +123,7 @@ jobs:
     container: ${{ inputs.builder-container }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
@@ -161,7 +161,7 @@ jobs:
     steps:
       - name: Checkout
         if: ${{ matrix.enabled }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Java environment
         if: ${{ matrix.enabled && !matrix.container }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
@@ -180,14 +180,14 @@ jobs:
 
       - name: Setup Node.js registry scope
         if: ${{ matrix.enabled && inputs.publish-github-npm }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
 
       - name: Setup Python environment
         if: ${{ matrix.enabled && !matrix.container }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -248,7 +248,7 @@ jobs:
 
       - name: Upload Prebuilt (with versions)
         if: ${{ matrix.enabled && inputs.publish-versioning }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
@@ -259,7 +259,7 @@ jobs:
 
       - name: Upload Prebuilt (without versions)
         if: ${{ matrix.enabled && !inputs.publish-versioning }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
@@ -271,7 +271,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Bump Version
         if: ${{ inputs.prebuild }}
@@ -282,7 +282,7 @@ jobs:
 
       - name: Download Artifacts
         if: ${{ inputs.prebuild }}
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           path: "github-artifacts"
 
