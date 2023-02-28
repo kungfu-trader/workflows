@@ -57,6 +57,10 @@ on:
         default: false
         type: boolean
         required: false
+      setup-env-timeout-minutes:
+        default: 10
+        type: number
+        required: false
       build-timeout-minutes:
         default: 60
         type: number
@@ -216,7 +220,7 @@ jobs:
         if: ${{ matrix.enabled }}
         uses: nick-fields/retry@v2
         with:
-          timeout_minutes: 10
+          timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
           max_attempts: 3
           command: yarn --network-timeout=1000000 install --frozen-lockfile
           new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
