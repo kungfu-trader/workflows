@@ -15,6 +15,9 @@ jobs:
       prebuild: false
       check-format: false
       list-dependencies: true
+    secrets:
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+      AIRTABLE_API_KEY_2: ${{ secrets.AIRTABLE_API_KEY_2 }}
   
   verify:
     # report status for branch protection rule
