@@ -1,6 +1,6 @@
 {
   "name": "@kungfu-trader/github-workflows",
-  "version": "1.2.3",
+  "version": "1.2.4-alpha.3",
   "repository": "https://github.com/kungfu-trader/workflows",
   "author": "Keren Dong",
   "license": "Apache-2.0",
@@ -8,5 +8,10 @@
   "scripts": {
     "build": "echo ::notice::Run build for workflow",
     "package": "echo ::notice::Run package for workflow"
+  },
+  "dependencies": {
+    "@kungfu-trader/action-merge-close-issue": "latest",
+    "@kungfu-trader/action-purge-artifacts": "latest",
+    "@kungfu-trader/action-sync-pr-package": "latest"
   }
 }
