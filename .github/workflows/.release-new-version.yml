@@ -185,10 +185,9 @@ jobs:
         uses: kungfu-trader/action-rollback-release@v1
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-  if_merged:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
+
+      - name: Close Issues 
+        if: github.event.pull_request.merged == true
+        uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
