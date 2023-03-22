@@ -113,6 +113,10 @@ on:
         default: false 
         type: boolean
         required: false
+      manager:
+        default: "kungfu-developers"
+        type: string
+        required: false
     secrets:
       AWS_CI_ACCESS_KEY_ID:
         required: false
@@ -142,6 +146,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
+
+      - name: Set Collaborators
+        uses: kungfu-trader/action-set-collaborators@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          manager: ${{ inputs.manager }}
 
       - name: Check Format
         if: ${{ inputs.check-format }}
