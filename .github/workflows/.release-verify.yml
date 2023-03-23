@@ -147,6 +147,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
+      - name: Set Collaborators
+        uses: kungfu-trader/action-set-collaborators@v1.0-alpha
+        with:
+          token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
+          manager: ${{ inputs.manager }}
+
       - name: Check Format
         if: ${{ inputs.check-format }}
         uses: kungfu-trader/action-check-format@v1
