@@ -132,6 +132,8 @@ on:
         required: false
       AIRTABLE_API_KEY_2:
         required: false
+      GITHUB_PUSH_TOKEN:
+        required: true
 
 jobs:
   prepare:
@@ -150,7 +152,7 @@ jobs:
       - name: Set Collaborators
         uses: kungfu-trader/action-set-collaborators@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           manager: ${{ inputs.manager }}
 
       - name: Check Format
