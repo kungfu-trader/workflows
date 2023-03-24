@@ -113,6 +113,10 @@ on:
         default: false 
         type: boolean
         required: false
+      manager:
+        default: "kungfu-developers"
+        type: string
+        required: false
     secrets:
       AWS_CI_ACCESS_KEY_ID:
         required: false
@@ -128,6 +132,8 @@ on:
         required: false
       AIRTABLE_API_KEY_2:
         required: false
+      GITHUB_PUSH_TOKEN:
+        required: true
 
 jobs:
   prepare:
@@ -142,6 +148,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
+
+      - name: Set Collaborators
+        uses: kungfu-trader/action-set-collaborators@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          manager: ${{ inputs.manager }}
 
       - name: Check Format
         if: ${{ inputs.check-format }}
