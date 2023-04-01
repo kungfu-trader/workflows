@@ -110,7 +110,7 @@ on:
         type: string
         required: false
       list-dependencies:
-        default: false 
+        default: false
         type: boolean
         required: false
       manager:
@@ -192,7 +192,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ inputs.java-version }}
-          distribution: 'temurin'
+          distribution: "temurin"
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
@@ -279,6 +279,7 @@ jobs:
             **/build/stage/*/v*/v*/*.*
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
+            **/build/stage/**/kungfu-update-*.yml
             !**/build/stage/**/*.yaml
 
       - name: Upload Prebuilt (without versions)
@@ -350,7 +351,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
-          
+
       - name: Find Dependencies
         uses: kungfu-trader/action-package-dependency@v1.0-alpha
         with:
