@@ -351,7 +351,7 @@ jobs:
           action: "verify"
 
       - name: Find Dependencies
-        uses: kungfu-trader/action-package-dependency@v1
+        uses: kungfu-trader/action-package-dependency@v1.0-alpha
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           find-dependencies: ${{ inputs.find-dependencies }}
