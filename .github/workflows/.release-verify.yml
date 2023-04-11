@@ -109,8 +109,8 @@ on:
         default: "32"
         type: string
         required: false
-      list-dependencies:
-        default: false
+      find-dependencies:
+        default: false 
         type: boolean
         required: false
       manager:
@@ -129,8 +129,6 @@ on:
       NODE_AUTH_TOKEN:
         required: false
       AIRTABLE_API_KEY:
-        required: false
-      AIRTABLE_API_KEY_2:
         required: false
       GITHUB_PUSH_TOKEN:
         required: true
@@ -353,8 +351,7 @@ jobs:
           action: "verify"
 
       - name: Find Dependencies
-        uses: kungfu-trader/action-package-dependency@v1.0-alpha
+        uses: kungfu-trader/action-package-dependency@v1
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          apiKey2: ${{ secrets.AIRTABLE_API_KEY_2 }}
-          list-dependencies: ${{ inputs.list-dependencies }}
+          find-dependencies: ${{ inputs.find-dependencies }}
