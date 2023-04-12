@@ -131,7 +131,7 @@ on:
       AIRTABLE_API_KEY:
         required: false
       GITHUB_PUSH_TOKEN:
-        required: true
+        required: false
 
 jobs:
   prepare:
