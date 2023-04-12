@@ -109,9 +109,13 @@ on:
         default: "32"
         type: string
         required: false
-      list-dependencies:
+      find-dependencies:
         default: false 
         type: boolean
+        required: false
+      manager:
+        default: "kungfu-developers"
+        type: string
         required: false
     secrets:
       AWS_CI_ACCESS_KEY_ID:
@@ -126,8 +130,8 @@ on:
         required: false
       AIRTABLE_API_KEY:
         required: false
-      AIRTABLE_API_KEY_2:
-        required: false
+      GITHUB_PUSH_TOKEN:
+        required: true
 
 jobs:
   prepare:
@@ -142,6 +146,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
+
+      - name: Set Collaborators
+        uses: kungfu-trader/action-set-collaborators@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          manager: ${{ inputs.manager }}
 
       - name: Check Format
         if: ${{ inputs.check-format }}
@@ -180,7 +190,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ inputs.java-version }}
-          distribution: 'temurin'
+          distribution: "temurin"
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
@@ -267,6 +277,7 @@ jobs:
             **/build/stage/*/v*/v*/*.*
             !**/build/stage/**/.*
             !**/build/stage/**/*.yml
+            **/build/stage/**/kungfu-update-*.yml
             !**/build/stage/**/*.yaml
 
       - name: Upload Prebuilt (without versions)
@@ -338,10 +349,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
-          
+
       - name: Find Dependencies
-        uses: kungfu-trader/action-package-dependency@v1.0-alpha
+        uses: kungfu-trader/action-find-dependencies@v1
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          apiKey2: ${{ secrets.AIRTABLE_API_KEY_2 }}
-          list-dependencies: ${{ inputs.list-dependencies }}
+          find-dependencies: ${{ inputs.find-dependencies }}
