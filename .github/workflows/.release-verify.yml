@@ -132,8 +132,6 @@ on:
         required: false
       GITHUB_PUSH_TOKEN:
         required: false
-      NODE_AUTH_TOKEN:
-        required: false
 
 jobs:
   prepare:
