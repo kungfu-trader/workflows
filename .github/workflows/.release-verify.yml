@@ -26,11 +26,11 @@ on:
         type: string
         required: false
       build-runner-linux:
-        default: ubuntu-20.04
+        default: ubuntu-22.04
         type: string
         required: false
       build-runner-macos:
-        default: macos-11
+        default: macos-12
         type: string
         required: false
       build-runner-windows:
