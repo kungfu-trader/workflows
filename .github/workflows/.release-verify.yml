@@ -219,11 +219,11 @@ jobs:
       #   with:
       #     arch: x64
       
-      - name: Setup MSBUILD environment
-        uses: microsoft/setup-msbuild@v1
-        if: matrix.name == 'Windows'
-        with:
-          msbuild-architecture: x64
+      # - name: Setup MSBUILD environment
+      #   uses: microsoft/setup-msbuild@v1
+      #   if: matrix.name == 'Windows'
+      #   with:
+      #     msbuild-architecture: x64
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
