@@ -213,17 +213,11 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
-      # - name: Setup MSVC environment
-      #   uses: ilammy/msvc-dev-cmd@v1
-      #   if: matrix.name == 'Windows'
-      #   with:
-      #     arch: x64
-      
-      # - name: Setup MSBUILD environment
-      #   uses: microsoft/setup-msbuild@v1
-      #   if: matrix.name == 'Windows'
-      #   with:
-      #     msbuild-architecture: x64
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        if: matrix.name == 'Windows'
+        with:
+          arch: x64
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
