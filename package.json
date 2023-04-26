@@ -1,6 +1,6 @@
 {
   "name": "@kungfu-trader/github-workflows",
-  "version": "1.2.9-alpha.1",
+  "version": "1.2.10-alpha.0",
   "repository": "https://github.com/kungfu-trader/workflows",
   "author": "Keren Dong",
   "license": "Apache-2.0",
