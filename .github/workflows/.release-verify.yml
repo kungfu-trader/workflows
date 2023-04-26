@@ -165,15 +165,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ${{ inputs.build-runner-linux }}
-            name: "Linux"
+          - name: "Linux"
+            os: ${{ inputs.build-runner-linux }}
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
-          - os: ${{ inputs.build-runner-macos }}
-            name: "MacOS"
+          - name: "MacOS"
+            os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
-          - os: ${{ inputs.build-runner-windows }}
-            name: "Windows"
+          - name: "Windows"
+            os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
