@@ -225,7 +225,7 @@ jobs:
 
       - name: Install poetry
         if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
-        run: pipx install poetry==1.1.14
+        run: pipx install poetry==1.2.2
 
       - name: Bump Version
         if: ${{ matrix.enabled }}
