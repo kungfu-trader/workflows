@@ -219,12 +219,6 @@ jobs:
         with:
           msbuild-architecture: x64
 
-      # - name: Setup MSVC environment
-      #   uses: ilammy/msvc-dev-cmd@v1
-      #   if: matrix.name == 'Windows'
-      #   with:
-      #     arch: x64
-
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
         run: pipx install pipenv==2022.8.15
