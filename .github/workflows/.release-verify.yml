@@ -148,7 +148,7 @@ jobs:
           action: "verify"
 
       - name: Set Collaborators
-        uses: kungfu-trader/action-set-collaborators@v1.0-alpha
+        uses: kungfu-trader/action-set-collaborators@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
           manager: ${{ inputs.manager }}
@@ -165,15 +165,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ${{ inputs.build-runner-linux }}
-            name: "Linux"
+          - name: "Linux"
+            os: ${{ inputs.build-runner-linux }}
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
-          - os: ${{ inputs.build-runner-macos }}
-            name: "MacOS"
+          - name: "MacOS"
+            os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
-          - os: ${{ inputs.build-runner-windows }}
-            name: "Windows"
+          - name: "Windows"
+            os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
@@ -218,12 +218,6 @@ jobs:
         if: matrix.name == 'Windows'
         with:
           arch: x64
-      
-      - name: Setup MSBUILD environment
-        uses: microsoft/setup-msbuild@v1
-        if: matrix.name == 'Windows'
-        with:
-          msbuild-architecture: x64
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
@@ -231,7 +225,7 @@ jobs:
 
       - name: Install poetry
         if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
-        run: pipx install poetry==1.1.14
+        run: pipx install poetry==1.2.2
 
       - name: Bump Version
         if: ${{ matrix.enabled }}
