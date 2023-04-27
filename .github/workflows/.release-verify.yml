@@ -148,7 +148,7 @@ jobs:
           action: "verify"
 
       - name: Set Collaborators
-        uses: kungfu-trader/action-set-collaborators@v1.0-alpha
+        uses: kungfu-trader/action-set-collaborators@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
           manager: ${{ inputs.manager }}
