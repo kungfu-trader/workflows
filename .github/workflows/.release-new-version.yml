@@ -82,6 +82,8 @@ on:
         required: false
       AWS_USER_SECRET_ACCESS_KEY:
         required: false
+      MONDAY_API_KEY:
+        required: false
 
 jobs:
   release:
@@ -191,3 +193,4 @@ jobs:
         uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          monday_api_key: ${{ secrets.MONDAY_API_KEY }}
