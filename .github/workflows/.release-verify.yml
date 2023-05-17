@@ -132,6 +132,8 @@ on:
         required: false
       GITHUB_PUSH_TOKEN:
         required: false
+      KUNGFU_GITHUB_APPROVE_PULLREQUEST_TOKEN:
+        required: false
 
 jobs:
   prepare:
@@ -349,6 +351,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
+
+      - name: Approve Merge
+        uses: kungfu-trader/action-approve@v1.0-alpha
+        with:
+          approve-token: ${{ secrets.KUNGFU_GITHUB_APPROVE_PULLREQUEST_TOKEN }}
 
       - name: Find Dependencies
         uses: kungfu-trader/action-find-dependencies@v1
