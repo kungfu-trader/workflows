@@ -353,7 +353,7 @@ jobs:
           action: "verify"
 
       - name: Approve Merge
-        uses: kungfu-trader/action-approve@v1-alpha
+        uses: kungfu-trader/action-approve@v1.0-alpha
         with:
           approve-token: ${{ secrets.KUNGFU_GITHUB_APPROVE_PULLREQUEST_TOKEN }}
 
