@@ -355,7 +355,7 @@ jobs:
       - name: Approve Merge
         uses: kungfu-trader/action-approve@v1.0-alpha
         with:
-          approve-token: ${{ secrets.KUNGFU_GITHUB_APPROVE_PULLREQUEST_TOKEN }}
+          token: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Find Dependencies
         uses: kungfu-trader/action-find-dependencies@v1
