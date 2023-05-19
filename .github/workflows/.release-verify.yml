@@ -357,3 +357,8 @@ jobs:
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           find-dependencies: ${{ inputs.find-dependencies }}
+
+      - name: Approve Merge
+        uses: kungfu-trader/action-approve@v1
+        with:
+          token: ${{ secrets.NODE_AUTH_TOKEN }}
