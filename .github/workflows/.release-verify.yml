@@ -132,6 +132,8 @@ on:
         required: false
       GITHUB_PUSH_TOKEN:
         required: false
+      KUNGFU_GITHUB_APPROVE_PULLREQUEST_TOKEN:
+        required: false
 
 jobs:
   prepare:
@@ -355,3 +357,8 @@ jobs:
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           find-dependencies: ${{ inputs.find-dependencies }}
+
+      - name: Approve Merge
+        uses: kungfu-trader/action-approve@v1
+        with:
+          token: ${{ secrets.NODE_AUTH_TOKEN }}
