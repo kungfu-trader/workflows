@@ -37,6 +37,10 @@ on:
         default: windows-2022
         type: string
         required: false
+      code-signing:
+        default: false
+        type: boolean
+        required: false
       enable-linux:
         default: true
         type: boolean
@@ -128,6 +132,14 @@ on:
         required: false
       NODE_AUTH_TOKEN:
         required: false
+      APPLE_ID:
+        required: false
+      APPLE_ID_PASSWORD:
+        required: false
+      CSC_LINK:
+        required: false
+      CSC_KEY_PASSWORD:
+        required: false
       AIRTABLE_API_KEY:
         required: false
       GITHUB_PUSH_TOKEN:
@@ -137,7 +149,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: ${{ inputs.builder-container }}
     steps:
       - name: Checkout
@@ -265,10 +277,35 @@ jobs:
             **/build/**/*.log
             **/build/**/*.txt
           if-no-files-found: ignore
+      
+      - name: Setup Code Signing Environment
+        if: ${{ matrix.enabled && inputs.code-signing }}
+        shell: bash
+        run: |
+          EOF=KUNGFU_CODE_SIGNING_NEWLINE
+          echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
+          echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "CSC_KEY_PASSWORD=${{ secrets.CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
+          echo "${{ secrets.CSC_LINK }}" >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
+          echo "Environment Ready for Code Signing"
+          # cp "$GITHUB_ENV" ./github-env.log
 
       - name: Package Artifacts
         if: ${{ matrix.enabled }}
+        env:
+          CSC_FOR_PULL_REQUEST: ${{ inputs.code-signing}}
         run: yarn run package
+
+      - name: Upload Package Log
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.enabled && failure() }}
+        with:
+          name: "Package-Log-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          path: |
+            *.log
+          if-no-files-found: ignore
 
       - name: Upload Prebuilt (with versions)
         if: ${{ matrix.enabled && inputs.publish-versioning }}
@@ -293,7 +330,7 @@ jobs:
   verify:
     if: ${{ always() }}
     needs: [prepare, build]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
