@@ -5,7 +5,7 @@ on:
 
 jobs:
   traversal-messages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: kungfu-trader/action-sync-airtable@v2.0-alpha
         with:
