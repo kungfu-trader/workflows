@@ -190,7 +190,7 @@ jobs:
 
       - name: Close Issues 
         if: github.event.pull_request.merged == true
-        uses: kungfu-trader/action-merge-close-issue@v1
+        uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
