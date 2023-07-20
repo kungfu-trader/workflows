@@ -5,6 +5,10 @@ on:
         default: "16"
         type: string
         required: false
+      protect-dev-branches:
+        default: false
+        type: boolean
+        required: false
       publish-github-npm:
         default: true
         type: boolean
@@ -156,10 +160,11 @@ jobs:
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
-        uses: kungfu-trader/action-bump-version@v3
+        uses: kungfu-trader/action-bump-version@v3.1-alpha
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"
+          protect-dev-branches: ${{ inputs.protect-dev-branches }}
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
