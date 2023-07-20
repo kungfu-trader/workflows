@@ -5,6 +5,10 @@ on:
         default: "16"
         type: string
         required: false
+      protect-dev-branches:
+        default: false
+        type: boolean
+        required: false
       publish-github-npm:
         default: true
         type: boolean
@@ -88,7 +92,7 @@ on:
 jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
     steps:
@@ -160,6 +164,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"
+          protect-dev-branches: ${{ inputs.protect-dev-branches }}
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}

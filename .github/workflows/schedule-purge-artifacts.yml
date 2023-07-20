@@ -5,9 +5,9 @@ on:
 
 jobs:
   delete-artifacts:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: kungfu-trader/action-purge-artifacts@v1
         with:
           token: ${{ secrets.KUNGFU_GITHUB_TOKEN }}
-          expire-in: 14days
+          expire-in: 7days
