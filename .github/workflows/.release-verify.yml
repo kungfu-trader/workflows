@@ -37,10 +37,6 @@ on:
         default: windows-2022
         type: string
         required: false
-      code-signing:
-        default: false
-        type: boolean
-        required: false
       enable-linux:
         default: true
         type: boolean
@@ -132,19 +128,13 @@ on:
         required: false
       NODE_AUTH_TOKEN:
         required: false
-      APPLE_ID:
-        required: false
-      APPLE_ID_PASSWORD:
-        required: false
-      CSC_LINK:
-        required: false
-      CSC_KEY_PASSWORD:
-        required: false
       AIRTABLE_API_KEY:
         required: false
       GITHUB_PUSH_TOKEN:
         required: false
-      KUNGFU_GITHUB_APPROVE_PULLREQUEST_TOKEN:
+      CODE_SIGNING_ENV_MACOS:
+        required: false
+      CODE_SIGNING_ENV_WINDOWS:
         required: false
 
 jobs:
@@ -186,9 +176,11 @@ jobs:
           - name: "MacOS"
             os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
+            code-signing-env: ${{ secrets.CODE_SIGNING_ENV_MACOS }}
           - name: "Windows"
             os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
+            code-signing-env: ${{ secrets.CODE_SIGNING_ENV_WINDOWS }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     env:
@@ -279,23 +271,23 @@ jobs:
           if-no-files-found: ignore
       
       - name: Setup Code Signing Environment
-        if: ${{ matrix.enabled && inputs.code-signing }}
+        if: ${{ matrix.enabled && matrix.code-signing-env != '' }}
         shell: bash
         run: |
-          EOF=KUNGFU_CODE_SIGNING_NEWLINE
-          echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
-          echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "CSC_KEY_PASSWORD=${{ secrets.CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-          echo "${{ secrets.CSC_LINK }}" >> "$GITHUB_ENV"
-          echo "$EOF" >> "$GITHUB_ENV"
+          # EOF=KUNGFU_CODE_SIGNING_NEWLINE
+          # echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
+          # echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
+          # echo "CSC_KEY_PASSWORD=${{ secrets.CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+          # echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
+          # echo "${{ secrets.CSC_LINK }}" >> "$GITHUB_ENV"
+          # echo "$EOF" >> "$GITHUB_ENV"
+          echo "${{ matrix.code-signing-env }}" >> "$GITHUB_ENV"
           echo "Environment Ready for Code Signing"
-          # cp "$GITHUB_ENV" ./github-env.log
 
       - name: Package Artifacts
         if: ${{ matrix.enabled }}
         env:
-          CSC_FOR_PULL_REQUEST: ${{ inputs.code-signing}}
+          CSC_FOR_PULL_REQUEST: ${{ matrix.code-signing-env != '' }}
         run: yarn run package
 
       - name: Upload Package Log
