@@ -273,7 +273,7 @@ jobs:
           if-no-files-found: ignore
       
       - name: Setup Code Signing Environment
-        if: ${{ matrix.enabled && inputs.code-signing == 'true' }}
+        if: ${{ matrix.enabled && inputs.code-signing }}
         shell: bash
         run: |
           # EOF=KUNGFU_CODE_SIGNING_NEWLINE
@@ -293,7 +293,7 @@ jobs:
       - name: Package Artifacts
         if: ${{ matrix.enabled }}
         env:
-          CSC_FOR_PULL_REQUEST: ${{ inputs.code-signing == 'true' }}
+          CSC_FOR_PULL_REQUEST: ${{ inputs.code-signing }}
         run: yarn run package
 
       - name: Upload Package Log
