@@ -37,6 +37,10 @@ on:
         default: windows-2022
         type: string
         required: false
+      code-signing:
+        default: false
+        type: boolean
+        required: false
       enable-linux:
         default: true
         type: boolean
@@ -176,11 +180,9 @@ jobs:
           - name: "MacOS"
             os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
-            code-signing-env: ${{ secrets.CODE_SIGNING_ENV_MACOS }}
           - name: "Windows"
             os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
-            code-signing-env: ${{ secrets.CODE_SIGNING_ENV_WINDOWS }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     env:
@@ -271,7 +273,7 @@ jobs:
           if-no-files-found: ignore
       
       - name: Setup Code Signing Environment
-        if: ${{ matrix.enabled && matrix.code-signing-env != '' }}
+        if: ${{ matrix.enabled && inputs.code-signing == 'true' }}
         shell: bash
         run: |
           # EOF=KUNGFU_CODE_SIGNING_NEWLINE
@@ -281,13 +283,17 @@ jobs:
           # echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
           # echo "${{ secrets.CSC_LINK }}" >> "$GITHUB_ENV"
           # echo "$EOF" >> "$GITHUB_ENV"
-          echo "${{ matrix.code-signing-env }}" >> "$GITHUB_ENV"
+          if [ "${{ matrix.name }}" == "Windows" ]; then
+            echo "${{ secrets.CODE_SIGNING_ENV_WINDOWS }}" >> "$GITHUB_ENV"
+          elif [ "${{ matrix.name }}" == "MacOS" ]; then
+            echo "${{ secrets.CODE_SIGNING_ENV_MACOS }}" >> "$GITHUB_ENV"
+          fi
           echo "Environment Ready for Code Signing"
 
       - name: Package Artifacts
         if: ${{ matrix.enabled }}
         env:
-          CSC_FOR_PULL_REQUEST: ${{ matrix.code-signing-env != '' }}
+          CSC_FOR_PULL_REQUEST: ${{ inputs.code-signing == 'true' }}
         run: yarn run package
 
       - name: Upload Package Log
