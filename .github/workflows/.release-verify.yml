@@ -146,8 +146,6 @@ on:
         required: false
       WINDOWS_CSC_KEY:
         required: false
-      WINDOWS_CSC_KEY_PASSWORD:
-        required: false
 
 jobs:
   prepare:
@@ -293,7 +291,6 @@ jobs:
             echo "${{ secrets.APPLE_CSC_KEY }}" >> "$GITHUB_ENV"
             echo "$EOF" >> "$GITHUB_ENV"
           elif [ "${{ matrix.name }}" == "Windows" ]; then
-            echo "CSC_KEY_PASSWORD=${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
             echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
             echo "${{ secrets.WINDOWS_CSC_KEY }}" >> "$GITHUB_ENV"
             echo "$EOF" >> "$GITHUB_ENV"
