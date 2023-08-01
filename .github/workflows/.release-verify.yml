@@ -136,9 +136,17 @@ on:
         required: false
       GITHUB_PUSH_TOKEN:
         required: false
-      CODE_SIGNING_ENV_MACOS:
+      APPLE_ID:
         required: false
-      CODE_SIGNING_ENV_WINDOWS:
+      APPLE_ID_PASSWORD:
+        required: false
+      APPLE_CSC_KEY:
+        required: false
+      APPLE_CSC_KEY_PASSWORD:
+        required: false
+      WINDOWS_CSC_KEY:
+        required: false
+      WINDOWS_CSC_KEY_PASSWORD:
         required: false
 
 jobs:
@@ -276,17 +284,19 @@ jobs:
         if: ${{ matrix.enabled && inputs.code-signing }}
         shell: bash
         run: |
-          # EOF=KUNGFU_CODE_SIGNING_NEWLINE
-          # echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
-          # echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
-          # echo "CSC_KEY_PASSWORD=${{ secrets.CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-          # echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-          # echo "${{ secrets.CSC_LINK }}" >> "$GITHUB_ENV"
-          # echo "$EOF" >> "$GITHUB_ENV"
-          if [ "${{ matrix.name }}" == "Windows" ]; then
-            echo "${{ secrets.CODE_SIGNING_ENV_WINDOWS }}" >> "$GITHUB_ENV"
-          elif [ "${{ matrix.name }}" == "MacOS" ]; then
-            echo "${{ secrets.CODE_SIGNING_ENV_MACOS }}" >> "$GITHUB_ENV"
+          EOF=KUNGFU_CODE_SIGNING_NEWLINE
+          if [ "${{ matrix.name }}" == "MacOS" ]; then
+            echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
+            echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "CSC_KEY_PASSWORD=${{ secrets.APPLE_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
+            echo "${{ secrets.APPLE_CSC_KEY }}" >> "$GITHUB_ENV"
+            echo "$EOF" >> "$GITHUB_ENV"
+          elif [ "${{ matrix.name }}" == "Windows" ]; then
+            echo "CSC_KEY_PASSWORD=${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
+            echo "${{ secrets.WINDOWS_CSC_KEY }}" >> "$GITHUB_ENV"
+            echo "$EOF" >> "$GITHUB_ENV"
           fi
           echo "Environment Ready for Code Signing"
 
