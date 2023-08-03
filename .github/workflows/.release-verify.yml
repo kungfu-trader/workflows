@@ -37,10 +37,6 @@ on:
         default: windows-2022
         type: string
         required: false
-      code-signing:
-        default: false
-        type: boolean
-        required: false
       enable-linux:
         default: true
         type: boolean
@@ -51,6 +47,14 @@ on:
         required: false
       enable-windows:
         default: true
+        type: boolean
+        required: false
+      code-signing-macos:
+        default: false
+        type: boolean
+        required: false
+      code-signing-windows:
+        default: false
         type: boolean
         required: false
       use-pipenv:
@@ -183,12 +187,15 @@ jobs:
             os: ${{ inputs.build-runner-linux }}
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
+            code-signing: false
           - name: "MacOS"
             os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
+            code-sigining: ${{ inputs.code-signing-macos }}
           - name: "Windows"
             os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
+            code-sigining: ${{ inputs.code-signing-windows }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     env:
@@ -279,7 +286,7 @@ jobs:
           if-no-files-found: ignore
       
       - name: Setup Code Signing Environment
-        if: ${{ matrix.enabled && inputs.code-signing }}
+        if: ${{ matrix.enabled && matrix.code-signing }}
         shell: bash
         run: |
           EOF=KUNGFU_CODE_SIGNING_NEWLINE
