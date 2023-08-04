@@ -187,15 +187,14 @@ jobs:
             os: ${{ inputs.build-runner-linux }}
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
-            code-signing: false
           - name: "MacOS"
             os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
-            code-sigining: ${{ inputs.code-signing-macos }}
+            code-signing: ${{ inputs.code-signing-macos }}
           - name: "Windows"
             os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
-            code-sigining: ${{ inputs.code-signing-windows }}
+            code-signing: ${{ inputs.code-signing-windows }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     env:
