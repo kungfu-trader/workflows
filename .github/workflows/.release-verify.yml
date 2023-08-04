@@ -288,7 +288,10 @@ jobs:
       - name: Test Code Signing Environment
         if: ${{ matrix.enabled }}
         shell: bash
-        run: echo matrix.code-signing is ${{ matrix.code-signing }}
+        run: |
+          echo matrix.enabled is ${{ matrix.enabled }} .
+          echo matrix.code-signing is ${{ matrix.code-signing }} .
+          echo ${{ matrix }}
       
       - name: Setup Code Signing Environment
         if: ${{ matrix.enabled && matrix.code-signing }}
