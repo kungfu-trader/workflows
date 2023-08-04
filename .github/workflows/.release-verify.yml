@@ -285,6 +285,11 @@ jobs:
             **/build/**/*.txt
           if-no-files-found: ignore
       
+      - name: Test Code Signing Environment
+        if: ${{ matrix.enabled }}
+        shell: bash
+        run: echo matrix.code-signing is ${{ matrix.code-signing }}
+      
       - name: Setup Code Signing Environment
         if: ${{ matrix.enabled && matrix.code-signing }}
         shell: bash
