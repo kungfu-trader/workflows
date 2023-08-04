@@ -187,15 +187,14 @@ jobs:
             os: ${{ inputs.build-runner-linux }}
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
-            code-signing: false
           - name: "MacOS"
             os: ${{ inputs.build-runner-macos }}
             enabled: ${{ inputs.enable-macos }}
-            code-sigining: ${{ inputs.code-signing-macos }}
+            code-signing: ${{ inputs.code-signing-macos }}
           - name: "Windows"
             os: ${{ inputs.build-runner-windows }}
             enabled: ${{ inputs.enable-windows }}
-            code-sigining: ${{ inputs.code-signing-windows }}
+            code-signing: ${{ inputs.code-signing-windows }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     env:
@@ -284,14 +283,6 @@ jobs:
             **/build/**/*.log
             **/build/**/*.txt
           if-no-files-found: ignore
-      
-      - name: Test Code Signing Environment
-        if: ${{ matrix.enabled }}
-        shell: bash
-        run: |
-          echo matrix.enabled is ${{ matrix.enabled }} .
-          echo matrix.code-signing is ${{ matrix.code-signing }} .
-          echo ${{ matrix }}
       
       - name: Setup Code Signing Environment
         if: ${{ matrix.enabled && matrix.code-signing }}
