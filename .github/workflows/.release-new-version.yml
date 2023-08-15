@@ -209,6 +209,7 @@ jobs:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
   
       - name: Convert Release Note To Pdf
+        continue-on-error: true
         run: |-
           yarn global add md-to-pdf
           md-to-pdf ./notes/*.md
