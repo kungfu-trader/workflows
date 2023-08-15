@@ -88,6 +88,8 @@ on:
         required: false
       MONDAY_API_KEY:
         required: false
+      AIRTABLE_API_KEY:
+        required: false
 
 jobs:
   release:
@@ -199,3 +201,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
+    
+      - name: Create Release Note
+        uses: kungfu-trader/action-release-note@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+  
+      - name: Convert Release Note To Pdf
+        run: |-
+          yarn global add md-to-pdf
+          md-to-pdf ./notes/*.md
+   
+      - name: Upload Release Note
+        uses: actions/upload-artifact@v3
+        with:
+          name: Release-Note-${{github.repository.name}}-${{github.sha}}
+          path: notes/*
+          if-no-files-found: ignore
+        
