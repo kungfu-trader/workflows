@@ -203,16 +203,10 @@ jobs:
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
     
       - name: Create Release Note
-        uses: kungfu-trader/action-release-note@v1.0-alpha
+        uses: kungfu-trader/action-release-note@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-  
-      - name: Convert Release Note To Pdf
-        continue-on-error: true
-        run: |-
-          yarn global add md-to-pdf
-          md-to-pdf ./notes/*.md
    
       - name: Upload Release Note
         uses: actions/upload-artifact@v3
