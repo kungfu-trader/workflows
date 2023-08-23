@@ -203,10 +203,23 @@ jobs:
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
     
       - name: Create Release Note
-        uses: kungfu-trader/action-release-note@v1
+        uses: kungfu-trader/action-release-note@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+        
+      - uses: baileyjm02/markdown-to-pdf@v1
+        with:
+          input_dir: notes
+          output_dir: notes
+          build_html: true
+
+      - name: Publish Release Note to AWS
+        uses: kungfu-trader/action-release-note@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          bucket-release: ${{ inputs.bucket-release-ci }}
    
       - name: Upload Release Note
         uses: actions/upload-artifact@v3
