@@ -203,21 +203,34 @@ jobs:
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
     
       - name: Create Release Note
+        id: create_release_note
         uses: kungfu-trader/action-release-note@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-  
-      - name: Convert Release Note To Pdf
-        continue-on-error: true
-        run: |-
-          yarn global add md-to-pdf
-          md-to-pdf ./notes/*.md
+        
+      - name: convert Release Note To Pdf
+        if: steps.create_release_note.outputs.has_notes == 'true'
+        uses: baileyjm02/markdown-to-pdf@v1
+        with:
+          input_dir: notes
+          output_dir: pdfs
+          build_html: true
+
+      - name: Publish Release Note to AWS
+        if: steps.create_release_note.outputs.has_notes == 'true'
+        uses: kungfu-trader/action-release-note@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          bucket-release: ${{ inputs.bucket-release-ci }}
    
       - name: Upload Release Note
         uses: actions/upload-artifact@v3
         with:
           name: Release-Note-${{github.repository.name}}-${{github.sha}}
-          path: notes/*
+          path: |
+            notes/*
+            pdfs/*
           if-no-files-found: ignore
         
