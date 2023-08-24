@@ -230,8 +230,7 @@ jobs:
         with:
           name: Release-Note-${{github.repository.name}}-${{github.sha}}
           path: |
-            notes
-            pdfs
-            */*.pdf
+            notes/*
+            pdfs/*
           if-no-files-found: ignore
         
