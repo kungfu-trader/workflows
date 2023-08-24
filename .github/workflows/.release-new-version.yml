@@ -214,7 +214,7 @@ jobs:
         uses: baileyjm02/markdown-to-pdf@v1
         with:
           input_dir: notes
-          output_dir: notes
+          output_dir: pdfs
           build_html: true
 
       - name: Publish Release Note to AWS
@@ -229,6 +229,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Release-Note-${{github.repository.name}}-${{github.sha}}
-          path: notes/*
+          path: |
+            notes
+            pdfs
+            */*.pdf
           if-no-files-found: ignore
         
