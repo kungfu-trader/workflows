@@ -241,11 +241,11 @@ jobs:
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
-        run: pipx install pipenv==2022.8.15
+        run: pipx install pipenv==2023.9.1
 
       - name: Install poetry
         if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
-        run: pipx install poetry==1.2.2
+        run: pipx install poetry==1.6.1
 
       - name: Bump Version
         if: ${{ matrix.enabled }}
