@@ -18,7 +18,7 @@ on:
         type: string
         required: false
       pipenv-version:
-        default: "2022.8.15"
+        default: "2023.9.1"
         type: string
         required: false
       poetry-version:
