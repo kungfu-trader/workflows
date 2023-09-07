@@ -414,7 +414,7 @@ jobs:
           find-dependencies: ${{ inputs.find-dependencies }}
 
       - name: Approve Merge
-        if: ${{ success() }}
+        if: ${{ success() && contains(join(needs.*.result, ','), 'failure') }}
         uses: kungfu-trader/action-approve@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
