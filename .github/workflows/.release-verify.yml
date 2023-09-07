@@ -17,6 +17,14 @@ on:
         default: "8"
         type: string
         required: false
+      pipenv-version:
+        default: "2023.9.1"
+        type: string
+        required: false
+      poetry-version:
+        default: "1.6.1"
+        type: string
+        required: false
       check-format:
         default: true
         type: boolean
@@ -241,11 +249,11 @@ jobs:
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
-        run: pipx install pipenv==2023.9.1
+        run: pipx install pipenv==${{ inputs.pipenv-version }}
 
       - name: Install poetry
         if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
-        run: pipx install poetry==1.6.1
+        run: pipx install poetry==${{ inputs.poetry-version }}
 
       - name: Bump Version
         if: ${{ matrix.enabled }}
@@ -406,7 +414,7 @@ jobs:
           find-dependencies: ${{ inputs.find-dependencies }}
 
       - name: Approve Merge
-        if: ${{ contains(needs.*.result, 'success') }}
+        if: ${{ !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
         uses: kungfu-trader/action-approve@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
