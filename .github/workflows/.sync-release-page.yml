@@ -1,0 +1,30 @@
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        default: "cn-northwest-1"
+        type: string
+        required: false
+      bucket:
+        default: "kungfu-releases"
+        type: string
+        required: false
+      bucket-path:
+        default: "/static"
+        type: string
+        required: false
+      product:
+        type: string
+        required: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate Release Page
+        uses: kungfu-trader/action-generate-release-page@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
