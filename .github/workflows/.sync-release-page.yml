@@ -16,6 +16,11 @@ on:
       product:
         type: string
         required: true
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
 
 jobs:
   generate:
@@ -28,3 +33,19 @@ jobs:
         uses: kungfu-trader/action-generate-release-page@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Publish Release Page to AWS
+        uses: kungfu-trader/action-publish-prebuilt@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          no-comment: true
+          artifacts-path: "dist"
+          bucket-staging: ${{ inputs.bucket }}
+          max-preview-links: ${{ inputs.max-preview-links }}
