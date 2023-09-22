@@ -13,8 +13,8 @@ on:
         default: "kungfu-releases"
         type: string
         required: false
-      bucket-path:
-        default: "/static"
+      release-path:
+        default: "static"
         type: string
         required: false
       product:
@@ -32,6 +32,8 @@ jobs:
         uses: kungfu-trader/action-generate-release-page@dev/v1/v1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          product: ${{ inputs.product }}
+          release-path: ${{ inputs.release-path }}
 
       - name: Configure AWS Crendentials
         uses: aws-actions/configure-aws-credentials@v4
