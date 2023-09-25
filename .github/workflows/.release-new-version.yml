@@ -73,6 +73,10 @@ on:
         default: "/*"
         type: string
         required: false
+      need-qa-automated:
+        default: false
+        type: boolean
+        required: false
     secrets:
       GITHUB_PUSH_TOKEN:
         required: true
@@ -209,7 +213,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
         
-      - name: convert Release Note To Pdf
+      - name: Convert Release Note To Pdf
         if: steps.create_release_note.outputs.has_notes == 'true'
         uses: baileyjm02/markdown-to-pdf@v1
         with:
@@ -223,7 +227,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           bucket-release: ${{ inputs.bucket-release-ci }}
-   
+
       - name: Upload Release Note
         uses: actions/upload-artifact@v3
         with:
@@ -232,4 +236,16 @@ jobs:
             notes/*
             pdfs/*
           if-no-files-found: ignore
+
+      - name: Sync Extensions Version Info To Airtable
+        uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+  
+      - name: Trigger Qa Automated
+        if: ${{ inputs.need-qa-automated }}
+        uses: kungfu-trader/action-qa-automated@v1.0-alpha
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
         
