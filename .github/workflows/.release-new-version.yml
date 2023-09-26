@@ -240,7 +240,7 @@ jobs:
       - name: Sync Extensions Version Info To Airtable
         uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
         with:
-            token: ${{ secrets.GITHUB_TOKEN }}
+            token: ${{ secrets.GITHUB_PUSH_TOKEN }}
             apiKey: ${{ secrets.AIRTABLE_API_KEY }}
   
       - name: Trigger Qa Automated
