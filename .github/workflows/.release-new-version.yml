@@ -247,5 +247,5 @@ jobs:
         if: ${{ inputs.need-qa-automated }}
         uses: kungfu-trader/action-qa-automated@v1.0-alpha
         with:
-            token: ${{ secrets.GITHUB_TOKEN }}
+            token: ${{ secrets.GITHUB_PUSH_TOKEN }}
         
