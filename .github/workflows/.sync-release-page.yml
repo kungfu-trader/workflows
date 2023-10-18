@@ -4,7 +4,7 @@ on:
       aws-role-arn:
         default: "arn:aws-cn:iam::186931371703:role/github-actions-role-dev"
         type: string
-        required: true
+        required: false
       aws-region:
         default: "cn-northwest-1"
         type: string
