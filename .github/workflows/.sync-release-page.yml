@@ -42,8 +42,8 @@ jobs:
       - name: Configure AWS Crendentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          audience: sts.amazonaws.com.cn
           role-to-assume: ${{ inputs.aws-role-arn }}
+          role-session-name: github-dev
           aws-region: ${{ inputs.aws-region }}
 
       - name: Publish Release Page to AWS
