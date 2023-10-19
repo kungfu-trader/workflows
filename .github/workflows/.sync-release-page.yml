@@ -13,6 +13,10 @@ on:
         default: "kungfu-releases"
         type: string
         required: false
+      cloudfront-id:
+        default: "E1GP1ZMAI7TELG"
+        type: string
+        required: false
       release-path:
         default: "static"
         type: string
@@ -47,9 +51,11 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Publish Release Page to AWS
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-trader/action-publish-prebuilt@dev/v2/v2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          no-comment: true
           artifacts-path: "dist"
-          bucket-staging: ${{ inputs.bucket }}
+          bucket-release: ${{ inputs.bucket }}
+          clean-release: true
+          cloudfront-id: ${{ inputs.cloudfront-id }}
+          cloudfront-paths: /${{ inputs.product }}/*
