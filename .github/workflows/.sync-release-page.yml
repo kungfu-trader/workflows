@@ -51,11 +51,11 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Publish Release Page to AWS
-        uses: kungfu-trader/action-publish-prebuilt@dev/v2/v2.0
+        uses: kungfu-trader/action-publish-prebuilt@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-path: "dist"
           bucket-release: ${{ inputs.bucket }}
-          clean-release: true
+          clean-release: false
           cloudfront-id: ${{ inputs.cloudfront-id }}
-          cloudfront-paths: /${{ inputs.product }}/*
+          cloudfront-paths: /${{ inputs.release-path }}/*
