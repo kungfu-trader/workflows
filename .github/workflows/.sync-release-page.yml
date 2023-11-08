@@ -4,13 +4,17 @@ on:
       aws-role-arn:
         default: "arn:aws-cn:iam::186931371703:role/github-actions-role-dev"
         type: string
-        required: true
+        required: false
       aws-region:
         default: "cn-northwest-1"
         type: string
         required: false
       bucket:
         default: "kungfu-releases"
+        type: string
+        required: false
+      cloudfront-id:
+        default: "E1GP1ZMAI7TELG"
         type: string
         required: false
       release-path:
@@ -21,6 +25,10 @@ on:
         type: string
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   sync-release-page:
     runs-on: ubuntu-22.04
@@ -29,7 +37,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Generate Release Page
-        uses: kungfu-trader/action-generate-release-page@dev/v1/v1.0
+        uses: kungfu-trader/action-generate-release-page@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           product: ${{ inputs.product }}
@@ -39,12 +47,15 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.aws-role-arn }}
+          role-session-name: github-dev
           aws-region: ${{ inputs.aws-region }}
 
       - name: Publish Release Page to AWS
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          no-comment: true
           artifacts-path: "dist"
-          bucket-staging: ${{ inputs.bucket }}
+          bucket-release: ${{ inputs.bucket }}
+          clean-release: false
+          cloudfront-id: ${{ inputs.cloudfront-id }}
+          cloudfront-paths: /${{ inputs.release-path }}/*
