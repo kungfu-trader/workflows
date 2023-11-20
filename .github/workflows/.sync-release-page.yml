@@ -24,6 +24,20 @@ on:
       product:
         type: string
         required: true
+      lower-edge:
+        type: string
+        required: false
+      upper-edge:
+        type: string
+        required: false
+      base-id:
+        type: string
+        required: true
+        default: "appAdi5zFFEsCzmEM"
+      release-url:
+        type: string
+        default: 'https://releases.kungfu-trader.com'
+        required: true
 
 permissions:
   id-token: write
@@ -36,19 +50,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Generate Release Page
-        uses: kungfu-trader/action-generate-release-page@v1.0-alpha
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          product: ${{ inputs.product }}
-          release-path: ${{ inputs.release-path }}
-
       - name: Configure AWS Crendentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.aws-role-arn }}
           role-session-name: github-dev
           aws-region: ${{ inputs.aws-region }}
+
+      - name: Generate Release Page
+        uses: kungfu-trader/action-generate-release-page@v1.0-alpha
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          product: ${{ inputs.product }}
+          release-path: ${{ inputs.release-path }}
+          release-url: ${{ inputs.release-url }}
+          lower-edge: ${{ inputs.lower-edge }}
+          upper-edge: ${{ inputs.upper-edge }}
+          base-id: ${{ inputs.base-id }}
 
       - name: Publish Release Page to AWS
         uses: kungfu-trader/action-publish-prebuilt@v2
