@@ -9,7 +9,7 @@ on:
         default: "cn-northwest-1"
         type: string
         required: false
-      bucket:
+      bucket-release:
         default: "kungfu-releases"
         type: string
         required: false
@@ -38,6 +38,9 @@ on:
         type: string
         default: 'https://releases.kungfu-trader.com'
         required: true
+      exclude:
+        type: string
+        required: false
 
 permissions:
   id-token: write
@@ -67,14 +70,16 @@ jobs:
           release-url: ${{ inputs.release-url }}
           lower-edge: ${{ inputs.lower-edge }}
           upper-edge: ${{ inputs.upper-edge }}
+          exclude: ${{ inputs.exclude }}
           base-id: ${{ inputs.base-id }}
+          bucket-release: ${{ inputs.bucket-release }}
 
       - name: Publish Release Page to AWS
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts-path: "dist"
-          bucket-release: ${{ inputs.bucket }}
+          bucket-release: ${{ inputs.bucket-release }}
           clean-release: false
           cloudfront-id: ${{ inputs.cloudfront-id }}
           cloudfront-paths: /${{ inputs.release-path }}/*
