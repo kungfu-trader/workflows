@@ -41,6 +41,9 @@ on:
       exclude:
         type: string
         required: false
+      description: 
+        type: string
+        required: false
 
 permissions:
   id-token: write
@@ -61,11 +64,12 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Generate Release Page
-        uses: kungfu-trader/action-generate-release-page@v1.0-alpha
+        uses: kungfu-trader/action-generate-release-page@dev/v1/v1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           product: ${{ inputs.product }}
+          description: ${{ inputs.description }}
           release-path: ${{ inputs.release-path }}
           release-url: ${{ inputs.release-url }}
           lower-edge: ${{ inputs.lower-edge }}
