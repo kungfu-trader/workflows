@@ -45,8 +45,6 @@ on:
         type: string
         required: false
     secrets:
-      GITHUB_TOKEN:
-        required: true
       AIRTABLE_API_KEY:
         required: false
 
