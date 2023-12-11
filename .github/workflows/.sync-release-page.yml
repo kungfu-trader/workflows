@@ -32,16 +32,19 @@ on:
         required: false
       base-id:
         type: string
-        required: true
+        required: false
         default: "appAdi5zFFEsCzmEM"
       release-url:
         type: string
         default: 'https://releases.kungfu-trader.com'
-        required: true
+        required: false
       exclude:
         type: string
         required: false
-      description: 
+      product-name: 
+        type: string
+        required: false
+      repo: 
         type: string
         required: false
     secrets:
@@ -72,7 +75,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           product: ${{ inputs.product }}
-          description: ${{ inputs.description }}
+          repo: ${{ inputs.repo }}
+          product-name: ${{ inputs.product-name }}
           release-path: ${{ inputs.release-path }}
           release-url: ${{ inputs.release-url }}
           lower-edge: ${{ inputs.lower-edge }}
