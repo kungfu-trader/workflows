@@ -69,6 +69,14 @@ jobs:
           role-session-name: github-dev
           aws-region: ${{ inputs.aws-region }}
 
+      - name: Generate Download Page
+        if: ${{ github.event.pull_request.merged }}
+        uses: kungfu-trader/action-generate-download-page@v1.0-alpha
+        with:
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+          bucket-release: ${{ inputs.bucket-release }}
+          airtable-baseid: ${{ inputs.base-id }}
+
       - name: Generate Release Page
         uses: kungfu-trader/action-generate-release-page@dev/v1/v1.0
         with:
