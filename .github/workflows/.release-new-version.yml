@@ -77,6 +77,10 @@ on:
         default: false
         type: boolean
         required: false
+      max-preview-links:
+        default: "32"
+        type: string
+        required: false
     secrets:
       GITHUB_PUSH_TOKEN:
         required: true
@@ -163,6 +167,7 @@ jobs:
           clean-release: ${{ inputs.clean-release-user }}
           cloudfront-id: ${{ inputs.cloudfront-id-user }}
           cloudfront-paths: ${{ inputs.cloudfront-paths-user }}
+          max-preview-links: ${{ inputs.max-preview-links }}
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
