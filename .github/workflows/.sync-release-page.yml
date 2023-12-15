@@ -71,7 +71,7 @@ jobs:
 
       - name: Generate Download Page
         if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-generate-download-page@v1.0-alpha
+        uses: kungfu-trader/action-generate-download-page@dev/v1/v1.0
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           bucket-release: ${{ inputs.bucket-release }}
