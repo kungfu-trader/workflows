@@ -28,6 +28,6 @@ jobs:
                 method: "POST"
                 headers: '{"X-GitHub-Api-Version": "2022-11-28"}'
                 bearer-token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-                body: '{"ref": "dev/v1/v1.0", "inputs": {"repo-includes": "${{inputs.repo-includes}}", "repo": "${{inputs.repo}}", "pull-request-title": "${{ github.event.pull_request.title }}"}}'
+                body: '{"ref": "dev/v1/v1.0", "inputs": {"repo-includes": "${{inputs.repo-includes}}", "repo": "${{inputs.repo}}", "pull-request-title": "${{ inputs.pull-request-title }}"}}'
   
         
