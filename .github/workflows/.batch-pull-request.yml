@@ -27,14 +27,6 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v3
 
-        - name: update deps version
-          uses: kungfu-trader/action-update-dependencies-version@dev/v1/v1.0
-          continue-on-error: true
-          with:
-              token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-              repo: ${{ inputs.repo }}
-              repo-includes: ${{ inputs.repo-includes }}
-
         - name: request batch pr
           uses: indiesdev/curl@v1.1
           continue-on-error: true
