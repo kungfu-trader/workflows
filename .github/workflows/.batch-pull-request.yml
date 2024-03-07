@@ -34,7 +34,6 @@ jobs:
               token: ${{ secrets.GITHUB_PUSH_TOKEN }}
               repo: ${{ inputs.repo }}
               repo-includes: ${{ inputs.repo-includes }}
-              repo-excludes: ${{ inputs.repo-excludes }}
 
         - name: request batch pr
           uses: indiesdev/curl@v1.1
