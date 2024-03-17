@@ -1,0 +1,92 @@
+on:
+  workflow_call:
+    inputs:
+      aws-role-arn:
+        default: "arn:aws-cn:iam::186931371703:role/github-actions-role-dev"
+        type: string
+        required: false
+      aws-region:
+        default: "cn-northwest-1"
+        type: string
+        required: false
+      bucket-release:
+        default: "kungfu-releases"
+        type: string
+        required: false
+      manager:
+        default: "kungfu-developers"
+        type: string
+        required: false
+    secrets:
+      AIRTABLE_API_KEY:
+        required: false
+      NODE_AUTH_TOKEN:
+        required: false
+      GITHUB_PUSH_TOKEN:
+        required: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set Pull Request Title
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
+
+      - name: Set Collaborators
+        uses: kungfu-trader/action-set-collaborators@v1
+        with:
+          token: ${{ secrets.NODE_AUTH_TOKEN }}
+          manager: ${{ inputs.manager }}
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.aws-role-arn }}
+          role-session-name: github-dev
+          aws-region: ${{ inputs.aws-region }}
+
+      # Build inside Docker containers
+      - run: sam build --use-container
+
+  verify:
+    if: ${{ always() }}
+    needs: [prepare, build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Verify Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
+
+      - name: Approve Merge
+        if: ${{ !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
+        uses: kungfu-trader/action-approve@v1
+        with:
+          token: ${{ secrets.NODE_AUTH_TOKEN }}
