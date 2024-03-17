@@ -14,9 +14,7 @@ on:
         type: string
         required: false
 
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all
 
 jobs:
   release:
