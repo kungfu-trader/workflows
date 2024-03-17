@@ -13,6 +13,9 @@ on:
         default: "kungfu-developers"
         type: string
         required: false
+    secrets:
+      NODE_AUTH_TOKEN:
+        required: false
 
 permissions:
   id-token: write
