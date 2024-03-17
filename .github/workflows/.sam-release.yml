@@ -13,11 +13,6 @@ on:
         default: "kungfu-releases"
         type: string
         required: false
-    secrets:
-      AIRTABLE_API_KEY:
-        required: false
-      GITHUB_PUSH_TOKEN:
-        required: false
 
 jobs:
   release:
