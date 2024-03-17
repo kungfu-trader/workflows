@@ -14,6 +14,10 @@ on:
         type: string
         required: false
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
