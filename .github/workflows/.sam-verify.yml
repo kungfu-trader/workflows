@@ -1,8 +1,12 @@
 on:
   workflow_call:
     inputs:
-      aws-role-arn:
-        default: "arn:aws-cn:iam::186931371703:role/github-actions-role-dev"
+      aws-root:
+        default: "aws-cn"
+        type: string
+        required: false
+      aws-role:
+        default: "github-actions-role-dev"
         type: string
         required: false
       aws-region:
@@ -14,6 +18,8 @@ on:
         type: string
         required: false
     secrets:
+      AWS_ACCOUNT_ID:
+        required: true
       NODE_AUTH_TOKEN:
         required: false
 
@@ -52,7 +58,7 @@ jobs:
       - name: Configure AWS Crendentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.aws-role-arn }}
+          role-to-assume: arn:${{inputs.aws-root}}:iam::${{secrets.AWS_ACCOUNT_ID}}:role/${{inputs.aws-role}}
           role-session-name: github-dev
           aws-region: ${{ inputs.aws-region }}
 
