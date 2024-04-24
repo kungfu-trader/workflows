@@ -35,13 +35,7 @@ jobs:
       steps:
         - name: Checkout
           uses: actions/checkout@v3
-  
-        - name: Set Pull Request Title
-          uses: kungfu-trader/action-bump-version@v3
-          with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            action: "verify"
-  
+
         - name: Set Collaborators
           uses: kungfu-trader/action-set-collaborators@v1
           with:
@@ -53,7 +47,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                os: [macos-latest]
+                os: [macos-13]
                 python-version: [3.9]
             
         steps:
@@ -74,7 +68,7 @@ jobs:
               scope: "@${{github.repository_owner}}"
 
           - name: Set up Python ${{ matrix.python-version }}
-            uses: actions/setup-python@v4
+            uses: actions/setup-python@v5
             with:
                 python-version: ${{ matrix.python-version }}
 
