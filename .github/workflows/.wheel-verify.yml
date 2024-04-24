@@ -48,7 +48,7 @@ jobs:
         needs: prepare
         strategy:
             matrix:
-                os: [macos-13]
+                os: [macos-12]
                 python-version: ['3.10']
         env:
             NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}            
@@ -76,10 +76,8 @@ jobs:
 
           - name: Install Pipenv
             run: |
-                  python -m pip install --upgrade pip
-                  pip install pipenv==2023.9.1
-                  pip install poetry==1.6.1
-                  pip install --upgrade keyring
+                  pipx install pipenv==2023.9.1
+                  pipx install poetry==1.6.1
 
           - name: Bump Version
             uses: kungfu-trader/action-bump-version@v3
@@ -102,7 +100,7 @@ jobs:
           - name: Run yarn build
             run: yarn build
             env: 
-                python-version: ${{ matrix.python-version }}
+                PYTHON_VERSION: ${{ matrix.python-version }}
         
           - name: Upload Prebuilt (without versions)
             uses: actions/upload-artifact@v3
