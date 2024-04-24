@@ -41,15 +41,17 @@ jobs:
           with:
             token: ${{ secrets.NODE_AUTH_TOKEN }}
             manager: kungfu-developers
-  
+
     build:
         name: Build on ${{ matrix.os }} with Python ${{ matrix.python-version }}
         runs-on: ${{ matrix.os }}
+        needs: prepare
         strategy:
             matrix:
                 os: [macos-13]
                 python-version: [3.9]
-            
+        env:
+            NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}            
         steps:
           - name: Checkout
             uses: actions/checkout@v3
