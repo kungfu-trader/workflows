@@ -36,6 +36,12 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v3
 
+        - name: Set Pull Request Title
+          uses: kungfu-trader/action-bump-version@v3
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            action: "verify"
+
         - name: Set Collaborators
           uses: kungfu-trader/action-set-collaborators@v1
           with:
@@ -48,7 +54,7 @@ jobs:
         needs: prepare
         strategy:
             matrix:
-                os: [macos-12]
+                os: [macos-12,ubuntu-22.04,windows-2022]
                 python-version: ['3.10']
         env:
             NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}            
@@ -107,7 +113,8 @@ jobs:
             with:
                 name: "Prebuilt-${{matrix.os}}-${{matrix.python-version}}-${{github.actor}}-${{github.sha}}"
                 path: |
-                    **/build/stage/**/*.*
+                    **/build/**/*.*
+                    **/build/**/**/*.*
 
     verify:
       if: ${{ always() }}
