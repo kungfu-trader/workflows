@@ -54,7 +54,7 @@ jobs:
         needs: prepare
         strategy:
             matrix:
-                os: [macos-12]
+                os: [macos-12, ubuntu-20.04]
                 python-version: ['3.10']
         env:
             NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}            
@@ -109,12 +109,11 @@ jobs:
                 PYTHON_VERSION: ${{ matrix.python-version }}
         
           - name: Upload Prebuilt (without versions)
-            uses: actions/upload-artifact@v3
+            uses: actions/upload-artifact@v4
             with:
                 name: "Prebuilt-${{matrix.os}}-${{matrix.python-version}}-${{github.actor}}-${{github.sha}}"
                 path: |
-                    dist/*
-                    build/*
+                    dist/KungfuWheel/*.*
                 if-no-files-found: ignore
 
     verify:
