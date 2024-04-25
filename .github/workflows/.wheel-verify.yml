@@ -116,7 +116,7 @@ jobs:
             with:
                 name: "Prebuilt-${{matrix.os}}-${{matrix.python-version}}-${{github.actor}}-${{github.sha}}"
                 path: |
-                    dist/KungfuWheel/*.*
+                    dist/KungfuWheel/**/*.*
                 if-no-files-found: ignore
 
     verify:
