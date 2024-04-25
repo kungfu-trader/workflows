@@ -113,8 +113,9 @@ jobs:
             with:
                 name: "Prebuilt-${{matrix.os}}-${{matrix.python-version}}-${{github.actor}}-${{github.sha}}"
                 path: |
-                    **/build/**/*.*
-                    **/build/**/**/*.*
+                    dist/*
+                    build/*
+                if-no-files-found: ignore
 
     verify:
       if: ${{ always() }}
