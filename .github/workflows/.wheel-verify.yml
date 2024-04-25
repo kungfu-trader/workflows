@@ -83,9 +83,9 @@ jobs:
           - name: Install Pipenv
             run: |
                   pipx install pipenv==2023.9.1
-                  pipx install poetry==1.6.1
+                  pipx install poetry==1.3.2
                   pipx install keyring==24.3.1
-                  pipx inject poetry setuptools==68.1.2
+                  pipx install virtualenv==20.23.1
 
           - name: Bump Version
             uses: kungfu-trader/action-bump-version@v3
