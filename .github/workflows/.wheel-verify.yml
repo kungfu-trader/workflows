@@ -127,6 +127,22 @@ jobs:
                   **/build/stage/**/*.*
                 if-no-files-found: ignore
 
+          - name: Configure AWS Crendentials (User)
+            uses: aws-actions/configure-aws-credentials@v1-node16
+            with:
+                aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
+                aws-region: ${{ inputs.aws-user-region }}
+
+          - name: Publish Prebuilt to AWS (User)
+            uses: kungfu-trader/action-publish-prebuilt@v2
+            with:
+                token: ${{ secrets.GITHUB_TOKEN }}
+                artifacts-path: "dist"
+                bucket-release: ${{ inputs.bucket-release }}
+                preview-files: ${{ inputs.preview-files }}
+                max-preview-links: ${{ inputs.max-preview-links }}
+
     verify:
       if: ${{ always() }}
       needs: [prepare, build]
@@ -140,22 +156,6 @@ jobs:
           with:
             token: ${{ secrets.GITHUB_TOKEN }}
             action: "prebuild"
-        
-        - name: Configure AWS Crendentials (User)
-          uses: aws-actions/configure-aws-credentials@v1-node16
-          with:
-              aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
-              aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
-              aws-region: ${{ inputs.aws-user-region }}
-        
-        - name: Publish Prebuilt to AWS (User)
-          uses: kungfu-trader/action-publish-prebuilt@v2
-          with:
-              token: ${{ secrets.GITHUB_TOKEN }}
-              artifacts-path: "dist"
-              bucket-release: ${{ inputs.bucket-release }}
-              preview-files: ${{ inputs.preview-files }}
-              max-preview-links: ${{ inputs.max-preview-links }}
   
         - name: Verify Version
           uses: kungfu-trader/action-bump-version@v3
