@@ -91,9 +91,8 @@ jobs:
           - name: Install Pipenv
             run: |
                   pipx install pipenv==2023.9.1
-                  pipx install poetry==1.3.2
+                  pipx install poetry==1.6.1
                   pipx install keyring==24.3.1
-                  pipx install virtualenv==20.23.1
 
           - name: Bump Version
             uses: kungfu-trader/action-bump-version@v3
@@ -101,23 +100,20 @@ jobs:
                 token: ${{ secrets.GITHUB_TOKEN }}
                 action: "prebuild"
 
-          - name: Install pip dependencies
-            run: |
-                pipenv install
-
           - name: Setup Build Environment
             uses: nick-fields/retry@v2
             with:
-                  timeout_minutes: 10
-                  max_attempts: 3
-                  command: yarn --network-timeout=1000000 install --frozen-lockfile
-                  new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
+                timeout_minutes: 10
+                max_attempts: 3
+                command: yarn --network-timeout=1000000 install --frozen-lockfile
+                new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
 
-          - name: Run yarn build
-            run: yarn build
-            continue-on-error: true
-            env: 
-                PYTHON_VERSION: ${{ matrix.python-version }}
+          - name: Build
+            uses: nick-fields/retry@v2
+            with:
+                timeout_minutes: 100
+                max_attempts: 1
+                command: yarn run build
         
           - name: Upload Prebuilt (without versions)
             uses: actions/upload-artifact@v4
