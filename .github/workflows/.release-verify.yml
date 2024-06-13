@@ -46,7 +46,7 @@ on:
         type: string
         required: false
       vsversion-windows:
-        default: windows-2022
+        default: 2022
         type: string
         required: false
       enable-linux:
