@@ -50,6 +50,9 @@ on:
     secrets:
       AIRTABLE_API_KEY:
         required: false
+      GITHUB_PUSH_TOKEN:
+        required: false
+
 
 permissions:
   id-token: write
@@ -71,7 +74,7 @@ jobs:
 
       - name: Generate Download Page
         if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-generate-download-page@v1.0-alpha
+        uses: kungfu-trader/action-generate-download-page@dev/v1/v1.0
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           bucket-release: ${{ inputs.bucket-release }}
@@ -80,7 +83,7 @@ jobs:
       - name: Generate Release Page
         uses: kungfu-trader/action-generate-release-page@dev/v1/v1.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           product: ${{ inputs.product }}
           repo: ${{ inputs.repo }}
@@ -96,7 +99,7 @@ jobs:
       - name: Publish Release Page to AWS
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           artifacts-path: "dist"
           bucket-release: ${{ inputs.bucket-release }}
           clean-release: false

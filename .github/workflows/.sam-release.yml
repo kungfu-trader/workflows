@@ -1,0 +1,55 @@
+on:
+  workflow_call:
+    inputs:
+      aws-root:
+        default: "aws-cn"
+        type: string
+        required: false
+      aws-role:
+        default: "github-actions-role-dev"
+        type: string
+        required: false
+      aws-region:
+        default: "cn-northwest-1"
+        type: string
+        required: false
+      bucket-release:
+        default: "kungfu-releases"
+        type: string
+        required: false
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+
+permissions: write-all
+
+jobs:
+  release:
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Bump Version
+        id: bump_version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:${{inputs.aws-root}}:iam::${{secrets.AWS_ACCOUNT_ID}}:role/${{inputs.aws-role}}
+          role-session-name: github-dev
+          aws-region: ${{ inputs.aws-region }}
+
+      # Build inside Docker containers
+      - run: sam build --use-container
+      # Prevent prompts and failure when the stack is unchanged
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset

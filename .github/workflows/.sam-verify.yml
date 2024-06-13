@@ -1,0 +1,86 @@
+on:
+  workflow_call:
+    inputs:
+      aws-root:
+        default: "aws-cn"
+        type: string
+        required: false
+      aws-role:
+        default: "github-actions-role-dev"
+        type: string
+        required: false
+      aws-region:
+        default: "cn-northwest-1"
+        type: string
+        required: false
+      manager:
+        default: "kungfu-developers"
+        type: string
+        required: false
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: true
+      NODE_AUTH_TOKEN:
+        required: false
+
+permissions: write-all
+
+jobs:
+  prepare:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set Pull Request Title
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
+
+      - name: Set Collaborators
+        uses: kungfu-trader/action-set-collaborators@v1
+        with:
+          token: ${{ secrets.NODE_AUTH_TOKEN }}
+          manager: ${{ inputs.manager }}
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Configure AWS Crendentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:${{inputs.aws-root}}:iam::${{secrets.AWS_ACCOUNT_ID}}:role/${{inputs.aws-role}}
+          role-session-name: github-dev
+          aws-region: ${{ inputs.aws-region }}
+
+      # Build inside Docker containers
+      - run: sam build --use-container
+
+  verify:
+    if: ${{ always() }}
+    needs: [prepare, build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Bump Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "prebuild"
+
+      - name: Verify Version
+        uses: kungfu-trader/action-bump-version@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          action: "verify"
