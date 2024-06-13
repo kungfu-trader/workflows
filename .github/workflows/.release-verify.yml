@@ -246,6 +246,7 @@ jobs:
         if: matrix.name == 'Windows'
         with:
           arch: x64
+          vsversion: ${{ inputs.build-runner-windows }}
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
