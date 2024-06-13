@@ -45,10 +45,6 @@ on:
         default: windows-2022
         type: string
         required: false
-      vsversion-windows:
-        default: 2022
-        type: string
-        required: false
       enable-linux:
         default: true
         type: boolean
@@ -250,7 +246,6 @@ jobs:
         if: matrix.name == 'Windows'
         with:
           arch: x64
-          vsversion: ${{ inputs.vsversion-windows }}
 
       - name: Install pipenv
         if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
