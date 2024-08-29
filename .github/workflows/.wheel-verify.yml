@@ -126,7 +126,7 @@ jobs:
               if-no-files-found: ignore
 
         - name: Configure AWS Crendentials (User)
-          uses: aws-actions/configure-aws-credentials@v1-node16
+          uses: aws-actions/configure-aws-credentials@v1-node20
           with:
               aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
               aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
