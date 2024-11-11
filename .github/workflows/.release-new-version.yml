@@ -171,7 +171,7 @@ jobs:
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
-        uses: kungfu-trader/action-bump-version@dev/v3
+        uses: kungfu-trader/action-bump-version@dev/v3/v3.1
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"
