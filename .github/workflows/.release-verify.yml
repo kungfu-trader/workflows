@@ -34,7 +34,7 @@ on:
         type: string
         required: false
       build-runner-linux:
-        default: ubuntu-latest
+        default: ubuntu-20.4
         type: string
         required: false
       build-runner-macos:
@@ -164,7 +164,7 @@ env:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.4
     container: ${{ inputs.builder-container }}
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
@@ -231,7 +231,7 @@ jobs:
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
@@ -239,7 +239,7 @@ jobs:
 
       - name: Setup Node.js registry scope
         if: ${{ matrix.enabled && inputs.publish-github-npm }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
