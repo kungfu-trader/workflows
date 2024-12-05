@@ -173,6 +173,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
