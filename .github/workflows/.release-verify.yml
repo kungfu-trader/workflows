@@ -172,7 +172,7 @@ jobs:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
@@ -220,7 +220,7 @@ jobs:
     steps:
       - name: Checkout
         if: ${{ matrix.enabled }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Java environment
         if: ${{ matrix.enabled && !matrix.container }}
@@ -360,7 +360,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Bump Version
         if: ${{ inputs.prebuild }}
