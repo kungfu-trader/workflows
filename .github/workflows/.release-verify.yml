@@ -6,7 +6,7 @@ on:
         type: boolean
         required: false
       node-version:
-        default: "18"
+        default: "20"
         type: string
         required: false
       python-version:
