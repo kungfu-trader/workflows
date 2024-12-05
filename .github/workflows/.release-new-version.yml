@@ -110,7 +110,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
@@ -118,7 +118,7 @@ jobs:
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.publish-github-npm }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
@@ -179,14 +179,14 @@ jobs:
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
 
       - name: Setup NPM registry for owner
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
