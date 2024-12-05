@@ -166,9 +166,12 @@ jobs:
   prepare:
     runs-on: ubuntu-22.04
     container: ${{ inputs.builder-container }}
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
+      USE_HARD_LINKS: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
@@ -214,7 +217,7 @@ jobs:
     steps:
       - name: Checkout
         if: ${{ matrix.enabled }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java environment
         if: ${{ matrix.enabled && !matrix.container }}
@@ -354,7 +357,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Bump Version
         if: ${{ inputs.prebuild }}
