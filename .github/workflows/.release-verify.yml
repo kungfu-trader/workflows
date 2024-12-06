@@ -34,7 +34,7 @@ on:
         type: string
         required: false
       build-runner-linux:
-        default: ubuntu-20.4
+        default: ubuntu-22.04
         type: string
         required: false
       build-runner-macos:
@@ -159,13 +159,13 @@ on:
       WINDOWS_CSC_KEY:
         required: false
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   prepare:
-    runs-on: ubuntu-20.4
+    runs-on: ubuntu-22.04
     container: ${{ inputs.builder-container }}
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
-      USE_HARD_LINKS: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3

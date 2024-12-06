@@ -15,7 +15,7 @@ jobs:
   try:
     uses: ./.github/workflows/.release-verify.yml
     with:
-      builder-container: kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.1
+      builder-container: kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.6
       prebuild: false
       check-format: false
       find-dependencies: true
@@ -26,7 +26,7 @@ jobs:
   verify:
     # report status for branch protection rule
     needs: try
-    runs-on: ubuntu-20.4
+    runs-on: ubuntu-22.04
     steps:
       - name: report
         run: echo verified
