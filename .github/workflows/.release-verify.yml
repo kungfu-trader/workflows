@@ -30,7 +30,7 @@ on:
         type: boolean
         required: false
       builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.2.3"
+        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.6"
         type: string
         required: false
       build-runner-linux:
@@ -169,6 +169,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
       - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
