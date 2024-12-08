@@ -30,7 +30,7 @@ on:
         type: boolean
         required: false
       builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.6"
+        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.7"
         type: string
         required: false
       build-runner-linux:
