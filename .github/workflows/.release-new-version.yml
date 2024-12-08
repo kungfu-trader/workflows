@@ -2,7 +2,7 @@ on:
   workflow_call:
     inputs:
       node-version:
-        default: "16"
+        default: "20"
         type: string
         required: false
       protect-dev-branches:
@@ -131,7 +131,7 @@ jobs:
 
       - name: Configure AWS Crendentials (CI)
         if: ${{ inputs.publish-aws-ci }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
@@ -147,11 +147,11 @@ jobs:
           clean-release: ${{ inputs.clean-release-ci }}
           cloudfront-id: ${{ inputs.cloudfront-id-ci }}
           cloudfront-paths: ${{ inputs.cloudfront-paths-ci }}
-          no-comment: 'true'
+          no-comment: "true"
 
       - name: Configure AWS Crendentials (User)
         if: ${{ inputs.publish-aws-user }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
@@ -182,14 +182,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Setup NPM registry for owner
         if: ${{ inputs.publish-npmjs }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
           scope: "@${{github.repository_owner}}"
 
       - name: Publish to NPM Packages
@@ -204,20 +204,20 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
 
-      - name: Close Issues 
+      - name: Close Issues
         if: github.event.pull_request.merged == true
         uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
-    
+
       - name: Create Release Note
         id: create_release_note
         uses: kungfu-trader/action-release-note@v1.0-alpha
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-        
+
       - name: Convert Release Note To Pdf
         if: steps.create_release_note.outputs.has_notes == 'true'
         uses: baileyjm02/markdown-to-pdf@v1
@@ -245,12 +245,11 @@ jobs:
       - name: Sync Extensions Version Info To Airtable
         uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
         with:
-            token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-            apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-  
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}
         uses: kungfu-trader/action-qa-automated@v1.0-alpha
         with:
-            token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-        
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}

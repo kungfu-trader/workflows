@@ -6,7 +6,7 @@ on:
         type: boolean
         required: false
       node-version:
-        default: "16"
+        default: "20"
         type: string
         required: false
       python-version:
@@ -30,7 +30,7 @@ on:
         type: boolean
         required: false
       builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-centos:v1.2.3"
+        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.7"
         type: string
         required: false
       build-runner-linux:
@@ -169,6 +169,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
 
       - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
@@ -371,7 +376,7 @@ jobs:
 
       - name: Configure AWS Crendentials (CI)
         if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
@@ -388,7 +393,7 @@ jobs:
 
       - name: Configure AWS Crendentials (User)
         if: ${{ inputs.prebuild && inputs.publish-aws-user }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
