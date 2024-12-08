@@ -15,7 +15,6 @@ jobs:
   try:
     uses: ./.github/workflows/.release-verify.yml
     with:
-      builder-container: kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.6
       prebuild: false
       check-format: false
       find-dependencies: true
