@@ -219,6 +219,10 @@ jobs:
         if: ${{ matrix.enabled }}
         uses: actions/checkout@v3
 
+      - name: Configure Git safe directory
+        if: ${{ matrix.enabled }}
+        run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+
       - name: Setup Java environment
         if: ${{ matrix.enabled && !matrix.container }}
         uses: actions/setup-java@v3
