@@ -172,6 +172,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+
       - name: Set Pull Request Title
         uses: kungfu-trader/action-bump-version@v3
         with:
