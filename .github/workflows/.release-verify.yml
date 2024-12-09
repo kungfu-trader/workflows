@@ -38,7 +38,7 @@ on:
         type: string
         required: false
       build-runner-macos:
-        default: macos-12
+        default: macos-14
         type: string
         required: false
       build-runner-windows:
