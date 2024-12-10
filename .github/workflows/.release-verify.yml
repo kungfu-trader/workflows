@@ -223,12 +223,12 @@ jobs:
         if: ${{ matrix.enabled }}
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
 
-      - name: Setup Java environment
-        if: ${{ matrix.enabled && !matrix.container }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ inputs.java-version }}
-          distribution: "temurin"
+      # - name: Setup Java environment
+      #   if: ${{ matrix.enabled && !matrix.container }}
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     java-version: ${{ inputs.java-version }}
+      #     distribution: "temurin"
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
