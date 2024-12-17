@@ -30,7 +30,7 @@ on:
         type: boolean
         required: false
       builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0-alpha.8"
+        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0"
         type: string
         required: false
       build-runner-linux:
@@ -38,7 +38,7 @@ on:
         type: string
         required: false
       build-runner-macos:
-        default: macos-14
+        default: macos-13
         type: string
         required: false
       build-runner-windows:
@@ -223,12 +223,12 @@ jobs:
         if: ${{ matrix.enabled }}
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
 
-      - name: Setup Java environment
-        if: ${{ matrix.enabled && !matrix.container }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ inputs.java-version }}
-          distribution: "temurin"
+      # - name: Setup Java environment
+      #   if: ${{ matrix.enabled && !matrix.container }}
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     java-version: ${{ inputs.java-version }}
+      #     distribution: "temurin"
 
       - name: Setup Node.js environment
         if: ${{ matrix.enabled }}
