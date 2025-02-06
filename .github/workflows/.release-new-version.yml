@@ -234,7 +234,7 @@ jobs:
           bucket-release: ${{ inputs.bucket-release-ci }}
 
       - name: Upload Release Note
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Release-Note-${{github.repository.name}}-${{github.sha}}
           path: |

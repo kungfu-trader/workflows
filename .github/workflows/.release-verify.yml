@@ -290,7 +290,7 @@ jobs:
           command: yarn run build
 
       - name: Upload Build Info
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.enabled && failure() }}
         with:
           name: "Build-Info-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
@@ -327,7 +327,7 @@ jobs:
         run: yarn run package
 
       - name: Upload Package Log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.enabled && failure() }}
         with:
           name: "Package-Log-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
@@ -337,7 +337,7 @@ jobs:
 
       - name: Upload Prebuilt (with versions)
         if: ${{ matrix.enabled && inputs.publish-versioning }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
@@ -349,7 +349,7 @@ jobs:
 
       - name: Upload Prebuilt (without versions)
         if: ${{ matrix.enabled && !inputs.publish-versioning }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
           path: |
@@ -372,7 +372,7 @@ jobs:
 
       - name: Download Artifacts
         if: ${{ inputs.prebuild }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: "github-artifacts"
 
