@@ -9,95 +9,15 @@ on:
         default: "16"
         type: string
         required: false
-      python-version:
-        default: "3.9"
-        type: string
-        required: false
-      java-version:
-        default: "8"
-        type: string
-        required: false
-      pipenv-version:
-        default: "2023.9.1"
-        type: string
-        required: false
-      poetry-version:
-        default: "1.6.1"
-        type: string
-        required: false
-      check-format:
-        default: true
-        type: boolean
-        required: false
       builder-container:
         default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0"
-        type: string
-        required: false
-      build-runner-linux:
-        default: ubuntu-22.04
-        type: string
-        required: false
-      build-runner-linux-labels:
-        default: ""
-        type: string
-        required: false
-      build-runner-macos:
-        default: macos-13
-        type: string
-        required: false
-      build-runner-macos-labels:
-        default: ""
-        type: string
-        required: false
-      build-runner-windows:
-        default: windows-2022
-        type: string
-        required: false
-      build-runner-windows-labels:
-        default: ""
         type: string
         required: false
       enable-linux:
         default: true
         type: boolean
         required: false
-      enable-macos:
-        default: true
-        type: boolean
-        required: false
-      enable-windows:
-        default: true
-        type: boolean
-        required: false
-      code-signing-macos:
-        default: false
-        type: boolean
-        required: false
-      code-signing-windows:
-        default: false
-        type: boolean
-        required: false
-      use-pipenv:
-        default: false
-        type: boolean
-        required: false
-      use-poetry:
-        default: false
-        type: boolean
-        required: false
-      setup-env-timeout-minutes:
-        default: 10
-        type: number
-        required: false
-      build-timeout-minutes:
-        default: 60
-        type: number
-        required: false
-      max-build-attempts:
-        default: 1
-        type: number
-        required: false
-      publish-github-npm:
+      publish-versioning:
         default: true
         type: boolean
         required: false
@@ -109,42 +29,6 @@ on:
         default: true
         type: boolean
         required: false
-      publish-versioning:
-        default: true
-        type: boolean
-        required: false
-      aws-ci-region:
-        default: "us-east-1"
-        type: string
-        required: false
-      aws-user-region:
-        default: "cn-northwest-1"
-        type: string
-        required: false
-      bucket-staging-ci:
-        default: "kungfu-prebuilt-staging"
-        type: string
-        required: false
-      bucket-staging-user:
-        default: "kungfu-prebuilt-staging"
-        type: string
-        required: false
-      preview-files:
-        default: ".*"
-        type: string
-        required: false
-      max-preview-links:
-        default: "32"
-        type: string
-        required: false
-      find-dependencies:
-        default: false 
-        type: boolean
-        required: false
-      manager:
-        default: "kungfu-developers"
-        type: string
-        required: false
       action-bump-version-repository:
         default: "kungfu-systems/action-bump-version"
         type: string
@@ -154,29 +38,7 @@ on:
         type: string
         required: false
     secrets:
-      AWS_CI_ACCESS_KEY_ID:
-        required: false
-      AWS_CI_SECRET_ACCESS_KEY:
-        required: false
-      AWS_USER_ACCESS_KEY_ID:
-        required: false
-      AWS_USER_SECRET_ACCESS_KEY:
-        required: false
       NODE_AUTH_TOKEN:
-        required: false
-      AIRTABLE_API_KEY:
-        required: false
-      GITHUB_PUSH_TOKEN:
-        required: false
-      APPLE_ID:
-        required: false
-      APPLE_ID_PASSWORD:
-        required: false
-      APPLE_CSC_KEY:
-        required: false
-      APPLE_CSC_KEY_PASSWORD:
-        required: false
-      WINDOWS_CSC_KEY:
         required: false
 
 env:
@@ -185,7 +47,6 @@ env:
 jobs:
   prepare:
     runs-on: ubuntu-22.04
-    container: ${{ inputs.builder-container }}
     permissions:
       contents: read
       pull-requests: write
@@ -193,15 +54,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure Git safe directory
-        run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
-
-      - name: Check Format
-        if: ${{ inputs.check-format }}
-        uses: kungfu-trader/action-check-format@v1
-        with:
-          token: ${{ github.token }}
-
       - name: Checkout Bump Version Action
         uses: actions/checkout@v3
         with:
@@ -210,7 +62,7 @@ jobs:
           path: node_modules/.github-actions/action-bump-version
           persist-credentials: false
 
-      - name: Set Pull Request Title
+      - name: Verify Version
         if: ${{ github.event_name == 'pull_request' }}
         run: node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
@@ -218,201 +70,39 @@ jobs:
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
 
-      - name: Set Collaborators
-        if: ${{ github.event_name == 'pull_request' && secrets.NODE_AUTH_TOKEN != '' }}
-        uses: kungfu-trader/action-set-collaborators@v1
-        with:
-          token: ${{ secrets.NODE_AUTH_TOKEN }}
-          manager: ${{ inputs.manager }}
-
   build:
     if: >-
       ${{
         inputs.prebuild &&
+        inputs.enable-linux &&
         (
           github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.full_name == github.repository
         )
       }}
     needs: prepare
+    runs-on: [self-hosted, Linux, X64, agent-120, kungfu-build, linux-x64]
+    container: ${{ inputs.builder-container }}
     permissions:
       contents: read
-    concurrency:
-      group: heavy-build-${{ github.repository }}-${{ github.workflow }}-${{ matrix.name }}
-      cancel-in-progress: false
-    strategy:
-      matrix:
-        include:
-          - name: "Linux"
-            runner: ${{ inputs.build-runner-linux-labels || format('"{0}"', inputs.build-runner-linux) }}
-            container: ${{ inputs.builder-container }}
-            enabled: ${{ inputs.enable-linux }}
-          - name: "MacOS"
-            runner: ${{ inputs.build-runner-macos-labels || format('"{0}"', inputs.build-runner-macos) }}
-            enabled: ${{ inputs.enable-macos }}
-            code-signing: ${{ inputs.code-signing-macos }}
-          - name: "Windows"
-            runner: ${{ inputs.build-runner-windows-labels || format('"{0}"', inputs.build-runner-windows) }}
-            enabled: ${{ inputs.enable-windows }}
-            code-signing: ${{ inputs.code-signing-windows }}
-    runs-on: ${{ fromJSON(matrix.runner) }}
-    container: ${{ matrix.container }}
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || github.token }}
-      USE_HARD_LINKS: false
     steps:
       - name: Checkout
-        if: ${{ matrix.enabled }}
         uses: actions/checkout@v3
         with:
           clean: true
           persist-credentials: false
 
-      - name: Checkout Bump Version Action
-        if: ${{ matrix.enabled }}
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ inputs.action-bump-version-repository }}
-          ref: ${{ inputs.action-bump-version-ref }}
-          path: node_modules/.github-actions/action-bump-version
-          persist-credentials: false
-
-      - name: Configure Git safe directory
-        if: ${{ matrix.enabled }}
-        run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
-
-      # - name: Setup Java environment
-      #   if: ${{ matrix.enabled && !matrix.container }}
-      #   uses: actions/setup-java@v3
-      #   with:
-      #     java-version: ${{ inputs.java-version }}
-      #     distribution: "temurin"
-
       - name: Setup Node.js environment
-        if: ${{ matrix.enabled }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
           scope: "@kungfu-trader"
 
-      - name: Setup Node.js registry scope
-        if: ${{ matrix.enabled && inputs.publish-github-npm }}
-        uses: actions/setup-node@v3
-        with:
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@${{github.repository_owner}}"
-
-      - name: Setup Python environment
-        if: ${{ matrix.enabled && !matrix.container }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ inputs.python-version }}
-
-      - name: Setup MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
-        if: matrix.name == 'Windows'
-        with:
-          arch: x64
-
-      - name: Install pipenv
-        if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
-        run: pipx install pipenv==${{ inputs.pipenv-version }}
-
-      - name: Install poetry
-        if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
-        run: pipx install poetry==${{ inputs.poetry-version }}
-
-      - name: Bump Version
-        if: ${{ matrix.enabled }}
-        run: node node_modules/.github-actions/action-bump-version/dist/index.js
-        env:
-          KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
-          INPUT_TOKEN: ${{ github.token }}
-          INPUT_ACTION: "prebuild"
-
-      - name: Setup Build Environment
-        if: ${{ matrix.enabled }}
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
-          max_attempts: 3
-          command: yarn --network-timeout=1000000 install --frozen-lockfile
-          new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
-
       - name: Build
-        if: ${{ matrix.enabled }}
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: ${{ inputs.build-timeout-minutes }}
-          max_attempts: ${{ inputs.max-build-attempts }}
-          command: yarn run build
-
-      - name: Upload Build Info
-        uses: actions/upload-artifact@v4
-        if: ${{ matrix.enabled && failure() }}
-        with:
-          name: "Build-Info-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
-          path: |
-            *.log
-            *.lock
-            **/*.lock
-            **/build/**/*.log
-            **/build/**/*.txt
-          if-no-files-found: ignore
-      
-      - name: Setup Code Signing Environment
-        if: ${{ matrix.enabled && matrix.code-signing }}
-        shell: bash
         run: |
-          EOF=KUNGFU_CODE_SIGNING_NEWLINE
-          if [ "${{ matrix.name }}" == "MacOS" ]; then
-            echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
-            echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "CSC_KEY_PASSWORD=${{ secrets.APPLE_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-            echo "${{ secrets.APPLE_CSC_KEY }}" >> "$GITHUB_ENV"
-            echo "$EOF" >> "$GITHUB_ENV"
-          elif [ "${{ matrix.name }}" == "Windows" ]; then
-            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-            echo "${{ secrets.WINDOWS_CSC_KEY }}" >> "$GITHUB_ENV"
-            echo "$EOF" >> "$GITHUB_ENV"
-          fi
-          echo "CSC_FOR_PULL_REQUEST=true" >> "$GITHUB_ENV"
-          echo "Environment Ready for Code Signing"
-
-      - name: Package Artifacts
-        if: ${{ matrix.enabled }}
-        run: yarn run package
-
-      - name: Upload Package Log
-        uses: actions/upload-artifact@v4
-        if: ${{ matrix.enabled && failure() }}
-        with:
-          name: "Package-Log-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
-          path: |
-            *.log
-          if-no-files-found: ignore
-
-      - name: Upload Prebuilt (with versions)
-        if: ${{ matrix.enabled && inputs.publish-versioning }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
-          path: |
-            **/build/stage/*/v*/v*/*.*
-            !**/build/stage/**/.*
-            !**/build/stage/**/*.yml
-            **/build/stage/**/kungfu-update-*.yml
-            !**/build/stage/**/*.yaml
-
-      - name: Upload Prebuilt (without versions)
-        if: ${{ matrix.enabled && !inputs.publish-versioning }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
-          path: |
-            **/build/stage/**/*.*
+          yarn --network-timeout=1000000 install --frozen-lockfile
+          yarn run build
 
   verify:
     if: ${{ always() }}
@@ -422,15 +112,10 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Reject untrusted prebuild PR
-        if: >-
-          ${{
-            inputs.prebuild &&
-            github.event_name == 'pull_request' &&
-            github.event.pull_request.head.repo.full_name != github.repository
-          }}
+      - name: Check build result
+        if: ${{ inputs.prebuild && needs.build.result != 'success' }}
         run: |
-          echo "::error::Self-hosted prebuild is only allowed for trusted same-repository pull requests."
+          echo "::error::Linux build result was ${{ needs.build.result }}"
           exit 1
 
       - name: Checkout
@@ -444,55 +129,6 @@ jobs:
           path: node_modules/.github-actions/action-bump-version
           persist-credentials: false
 
-      - name: Bump Version
-        if: ${{ inputs.prebuild }}
-        run: node node_modules/.github-actions/action-bump-version/dist/index.js
-        env:
-          KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
-          INPUT_TOKEN: ${{ github.token }}
-          INPUT_ACTION: "prebuild"
-
-      - name: Download Artifacts
-        if: ${{ inputs.prebuild }}
-        uses: actions/download-artifact@v4
-        with:
-          path: "github-artifacts"
-
-      - name: Configure AWS Crendentials (CI)
-        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.aws-ci-region }}
-
-      - name: Publish Prebuilt to AWS (CI)
-        if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
-        with:
-          token: ${{ github.token }}
-          artifacts-path: "github-artifacts"
-          bucket-staging: ${{ inputs.bucket-staging-ci }}
-          no-comment: "true"
-
-      - name: Configure AWS Crendentials (User)
-        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.aws-user-region }}
-
-      - name: Publish Prebuilt to AWS (User)
-        if: ${{ inputs.prebuild && inputs.publish-aws-user }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
-        with:
-          token: ${{ github.token }}
-          artifacts-path: "github-artifacts"
-          bucket-staging: ${{ inputs.bucket-staging-user }}
-          preview-files: ${{ inputs.preview-files }}
-          max-preview-links: ${{ inputs.max-preview-links }}
-
       - name: Verify Version
         if: ${{ github.event_name == 'pull_request' }}
         run: node node_modules/.github-actions/action-bump-version/dist/index.js
@@ -500,15 +136,3 @@ jobs:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
-
-      - name: Find Dependencies
-        uses: kungfu-trader/action-find-dependencies@v1
-        with:
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          find-dependencies: ${{ inputs.find-dependencies }}
-
-      - name: Approve Merge
-        if: ${{ github.event_name == 'pull_request' && secrets.NODE_AUTH_TOKEN != '' && (!inputs.prebuild || needs.build.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
-        uses: kungfu-trader/action-approve@v1
-        with:
-          token: ${{ secrets.NODE_AUTH_TOKEN }}
