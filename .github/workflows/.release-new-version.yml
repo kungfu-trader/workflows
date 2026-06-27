@@ -193,14 +193,16 @@ jobs:
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
-        run: node node_modules/.github-actions/action-bump-version/dist/index.js
+        run: >-
+          env
+          'INPUT_NO-PROTECTION=true'
+          'INPUT_PROTECT-DEV-BRANCHES=${{ inputs.protect-dev-branches }}'
+          'INPUT_RESET-DEFAULT-BRANCH=false'
+          node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "postbuild"
-          INPUT_NO-PROTECTION: "true"
-          INPUT_PROTECT-DEV-BRANCHES: ${{ inputs.protect-dev-branches }}
-          INPUT_RESET-DEFAULT-BRANCH: "false"
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
