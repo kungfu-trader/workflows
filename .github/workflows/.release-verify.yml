@@ -189,6 +189,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      HAS_NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.0
@@ -224,7 +226,7 @@ jobs:
           INPUT_ACTION: "verify"
 
       - name: Set Collaborators
-        if: ${{ github.event_name == 'pull_request' && secrets.NODE_AUTH_TOKEN != '' }}
+        if: ${{ github.event_name == 'pull_request' && env.HAS_NODE_AUTH_TOKEN == 'true' }}
         uses: kungfu-trader/action-set-collaborators@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
@@ -385,16 +387,20 @@ jobs:
         run: |
           EOF=KUNGFU_CODE_SIGNING_NEWLINE
           if [ "${{ matrix.name }}" == "MacOS" ]; then
-            echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
-            echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "CSC_KEY_PASSWORD=${{ secrets.APPLE_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-            echo "${{ secrets.APPLE_CSC_KEY }}" >> "$GITHUB_ENV"
-            echo "$EOF" >> "$GITHUB_ENV"
+            {
+              echo "APPLE_ID=${{ secrets.APPLE_ID }}"
+              echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}"
+              echo "CSC_KEY_PASSWORD=${{ secrets.APPLE_CSC_KEY_PASSWORD }}"
+              echo "CSC_LINK<<$EOF"
+              echo "${{ secrets.APPLE_CSC_KEY }}"
+              echo "$EOF"
+            } >> "$GITHUB_ENV"
           elif [ "${{ matrix.name }}" == "Windows" ]; then
-            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-            echo "${{ secrets.WINDOWS_CSC_KEY }}" >> "$GITHUB_ENV"
-            echo "$EOF" >> "$GITHUB_ENV"
+            {
+              echo "CSC_LINK<<$EOF"
+              echo "${{ secrets.WINDOWS_CSC_KEY }}"
+              echo "$EOF"
+            } >> "$GITHUB_ENV"
           fi
           echo "CSC_FOR_PULL_REQUEST=true" >> "$GITHUB_ENV"
           echo "Environment Ready for Code Signing"
@@ -439,6 +445,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      HAS_NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN != '' }}
     steps:
       - name: Reject untrusted prebuild PR
         if: >-
@@ -531,7 +539,7 @@ jobs:
           find-dependencies: ${{ inputs.find-dependencies }}
 
       - name: Approve Merge
-        if: ${{ github.event_name == 'pull_request' && secrets.NODE_AUTH_TOKEN != '' && (!inputs.prebuild || needs.build.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
+        if: ${{ github.event_name == 'pull_request' && env.HAS_NODE_AUTH_TOKEN == 'true' && (!inputs.prebuild || needs.build.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
         uses: kungfu-trader/action-approve@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}

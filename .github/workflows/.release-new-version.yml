@@ -263,7 +263,7 @@ jobs:
       - name: Upload Release Note
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: Release-Note-${{github.repository.name}}-${{github.sha}}
+          name: Release-Note-${{ github.event.repository.name }}-${{ github.sha }}
           path: |
             notes/*
             pdfs/*
