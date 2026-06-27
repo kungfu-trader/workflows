@@ -231,47 +231,31 @@ jobs:
     if: >-
       ${{
         inputs.prebuild &&
+        inputs.enable-linux &&
         (
           github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.full_name == github.repository
         )
       }}
     needs: prepare
+    runs-on: ${{ fromJSON(inputs.build-runner-linux-labels || format('"{0}"', inputs.build-runner-linux)) }}
+    container: ${{ inputs.builder-container }}
     permissions:
       contents: read
     concurrency:
-      group: heavy-build-${{ github.repository }}-${{ github.workflow }}-${{ matrix.name }}
+      group: heavy-build-${{ github.repository }}-${{ github.workflow }}-Linux
       cancel-in-progress: false
-    strategy:
-      matrix:
-        include:
-          - name: "Linux"
-            runner: ${{ inputs.build-runner-linux-labels || format('"{0}"', inputs.build-runner-linux) }}
-            container: ${{ inputs.builder-container }}
-            enabled: ${{ inputs.enable-linux }}
-          - name: "MacOS"
-            runner: ${{ inputs.build-runner-macos-labels || format('"{0}"', inputs.build-runner-macos) }}
-            enabled: ${{ inputs.enable-macos }}
-            code-signing: ${{ inputs.code-signing-macos }}
-          - name: "Windows"
-            runner: ${{ inputs.build-runner-windows-labels || format('"{0}"', inputs.build-runner-windows) }}
-            enabled: ${{ inputs.enable-windows }}
-            code-signing: ${{ inputs.code-signing-windows }}
-    runs-on: ${{ fromJSON(matrix.runner) }}
-    container: ${{ matrix.container }}
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || github.token }}
       USE_HARD_LINKS: false
     steps:
       - name: Checkout
-        if: ${{ matrix.enabled }}
         uses: actions/checkout@v3
         with:
           clean: true
           persist-credentials: false
 
       - name: Checkout Bump Version Action
-        if: ${{ matrix.enabled }}
         uses: actions/checkout@v3
         with:
           repository: ${{ inputs.action-bump-version-repository }}
@@ -280,18 +264,9 @@ jobs:
           persist-credentials: false
 
       - name: Configure Git safe directory
-        if: ${{ matrix.enabled }}
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
 
-      # - name: Setup Java environment
-      #   if: ${{ matrix.enabled && !matrix.container }}
-      #   uses: actions/setup-java@v3
-      #   with:
-      #     java-version: ${{ inputs.java-version }}
-      #     distribution: "temurin"
-
       - name: Setup Node.js environment
-        if: ${{ matrix.enabled }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node-version }}
@@ -299,34 +274,33 @@ jobs:
           scope: "@kungfu-trader"
 
       - name: Setup Node.js registry scope
-        if: ${{ matrix.enabled && inputs.publish-github-npm }}
+        if: ${{ inputs.publish-github-npm }}
         uses: actions/setup-node@v3
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
 
       - name: Setup Python environment
-        if: ${{ matrix.enabled && !matrix.container }}
+        if: ${{ false }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.python-version }}
 
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
-        if: matrix.name == 'Windows'
+        if: ${{ false }}
         with:
           arch: x64
 
       - name: Install pipenv
-        if: ${{ matrix.enabled && !matrix.container && inputs.use-pipenv }}
+        if: ${{ false }}
         run: pipx install pipenv==${{ inputs.pipenv-version }}
 
       - name: Install poetry
-        if: ${{ matrix.enabled && !matrix.container && inputs.use-poetry }}
+        if: ${{ false }}
         run: pipx install poetry==${{ inputs.poetry-version }}
 
       - name: Bump Version
-        if: ${{ matrix.enabled }}
         run: node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
@@ -334,7 +308,6 @@ jobs:
           INPUT_ACTION: "prebuild"
 
       - name: Setup Build Environment
-        if: ${{ matrix.enabled }}
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
@@ -343,7 +316,6 @@ jobs:
           new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
 
       - name: Build
-        if: ${{ matrix.enabled }}
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: ${{ inputs.build-timeout-minutes }}
@@ -352,9 +324,9 @@ jobs:
 
       - name: Upload Build Info
         uses: actions/upload-artifact@v4
-        if: ${{ matrix.enabled && failure() }}
+        if: ${{ failure() }}
         with:
-          name: "Build-Info-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          name: "Build-Info-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
           path: |
             *.log
             *.lock
@@ -362,45 +334,23 @@ jobs:
             **/build/**/*.log
             **/build/**/*.txt
           if-no-files-found: ignore
-      
-      - name: Setup Code Signing Environment
-        if: ${{ matrix.enabled && matrix.code-signing }}
-        shell: bash
-        run: |
-          EOF=KUNGFU_CODE_SIGNING_NEWLINE
-          if [ "${{ matrix.name }}" == "MacOS" ]; then
-            echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> "$GITHUB_ENV"
-            echo "APPLE_ID_PASSWORD=${{ secrets.APPLE_ID_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "CSC_KEY_PASSWORD=${{ secrets.APPLE_CSC_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-            echo "${{ secrets.APPLE_CSC_KEY }}" >> "$GITHUB_ENV"
-            echo "$EOF" >> "$GITHUB_ENV"
-          elif [ "${{ matrix.name }}" == "Windows" ]; then
-            echo "CSC_LINK<<$EOF" >> "$GITHUB_ENV"
-            echo "${{ secrets.WINDOWS_CSC_KEY }}" >> "$GITHUB_ENV"
-            echo "$EOF" >> "$GITHUB_ENV"
-          fi
-          echo "CSC_FOR_PULL_REQUEST=true" >> "$GITHUB_ENV"
-          echo "Environment Ready for Code Signing"
-
       - name: Package Artifacts
-        if: ${{ matrix.enabled }}
         run: yarn run package
 
       - name: Upload Package Log
         uses: actions/upload-artifact@v4
-        if: ${{ matrix.enabled && failure() }}
+        if: ${{ failure() }}
         with:
-          name: "Package-Log-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          name: "Package-Log-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
           path: |
             *.log
           if-no-files-found: ignore
 
       - name: Upload Prebuilt (with versions)
-        if: ${{ matrix.enabled && inputs.publish-versioning }}
+        if: ${{ inputs.publish-versioning }}
         uses: actions/upload-artifact@v4
         with:
-          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          name: "Prebuilt-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
           path: |
             **/build/stage/*/v*/v*/*.*
             !**/build/stage/**/.*
@@ -409,10 +359,10 @@ jobs:
             !**/build/stage/**/*.yaml
 
       - name: Upload Prebuilt (without versions)
-        if: ${{ matrix.enabled && !inputs.publish-versioning }}
+        if: ${{ !inputs.publish-versioning }}
         uses: actions/upload-artifact@v4
         with:
-          name: "Prebuilt-${{github.sha}}-${{matrix.name}}-${{github.actor}}-${{github.sha}}"
+          name: "Prebuilt-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
           path: |
             **/build/stage/**/*.*
 
