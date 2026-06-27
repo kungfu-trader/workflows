@@ -17,6 +17,18 @@ on:
         default: true
         type: boolean
         required: false
+      enable-macos:
+        default: true
+        type: boolean
+        required: false
+      enable-windows:
+        default: true
+        type: boolean
+        required: false
+      build-runner-linux-labels:
+        default: ""
+        type: string
+        required: false
       publish-versioning:
         default: true
         type: boolean
