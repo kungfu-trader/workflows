@@ -81,3 +81,61 @@ jobs:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
+
+  build-linux:
+    if: >-
+      ${{
+        inputs.prebuild &&
+        inputs.enable-linux &&
+        (
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      }}
+    needs: prepare
+    runs-on: ${{ fromJSON(inputs.build-runner-linux-labels || '"ubuntu-24.04"') }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          clean: true
+          persist-credentials: false
+
+      - name: Show Runner
+        run: |
+          echo "runner.name=${RUNNER_NAME}"
+          echo "runner.os=${RUNNER_OS}"
+          echo "runner.arch=${RUNNER_ARCH}"
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@kungfu-trader"
+
+      - name: Setup Node.js registry scope
+        if: ${{ inputs.publish-versioning }}
+        uses: actions/setup-node@v6
+        with:
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@${{ github.repository_owner }}"
+
+      - name: Install Dependencies
+        run: yarn --network-timeout=1000000 install --frozen-lockfile
+
+      - name: Build
+        run: yarn run build
+
+      - name: Lint
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.lint ? 0 : 1)"; then
+            yarn run lint
+          else
+            echo "No lint script"
+          fi
