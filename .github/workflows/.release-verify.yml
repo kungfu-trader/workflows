@@ -212,12 +212,11 @@ jobs:
 
       - name: Set Pull Request Title
         if: ${{ github.event_name == 'pull_request' }}
-        uses: ./node_modules/.github-actions/action-bump-version
+        run: node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
-        with:
-          token: ${{ github.token }}
-          action: "verify"
+          INPUT_TOKEN: ${{ github.token }}
+          INPUT_ACTION: "verify"
 
       - name: Set Collaborators
         if: ${{ github.event_name == 'pull_request' && secrets.NODE_AUTH_TOKEN != '' }}
@@ -326,12 +325,11 @@ jobs:
 
       - name: Bump Version
         if: ${{ matrix.enabled }}
-        uses: ./node_modules/.github-actions/action-bump-version
+        run: node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
-        with:
-          token: ${{ github.token }}
-          action: "prebuild"
+          INPUT_TOKEN: ${{ github.token }}
+          INPUT_ACTION: "prebuild"
 
       - name: Setup Build Environment
         if: ${{ matrix.enabled }}
@@ -448,12 +446,11 @@ jobs:
 
       - name: Bump Version
         if: ${{ inputs.prebuild }}
-        uses: ./node_modules/.github-actions/action-bump-version
+        run: node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
-        with:
-          token: ${{ github.token }}
-          action: "prebuild"
+          INPUT_TOKEN: ${{ github.token }}
+          INPUT_ACTION: "prebuild"
 
       - name: Download Artifacts
         if: ${{ inputs.prebuild }}
@@ -498,12 +495,11 @@ jobs:
 
       - name: Verify Version
         if: ${{ github.event_name == 'pull_request' }}
-        uses: ./node_modules/.github-actions/action-bump-version
+        run: node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
-        with:
-          token: ${{ github.token }}
-          action: "verify"
+          INPUT_TOKEN: ${{ github.token }}
+          INPUT_ACTION: "verify"
 
       - name: Find Dependencies
         uses: kungfu-trader/action-find-dependencies@v1
