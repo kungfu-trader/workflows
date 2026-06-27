@@ -120,10 +120,10 @@ jobs:
       NODE_AUTH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout Bump Version Action
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ inputs.action-bump-version-repository }}
           ref: ${{ inputs.action-bump-version-ref }}
@@ -131,7 +131,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
@@ -139,7 +139,7 @@ jobs:
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.publish-github-npm }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
@@ -206,14 +206,14 @@ jobs:
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
 
       - name: Setup NPM registry for owner
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
