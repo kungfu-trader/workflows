@@ -13,6 +13,10 @@ on:
         default: "3.9"
         type: string
         required: false
+      setup-python-enabled:
+        default: true
+        type: boolean
+        required: false
       java-version:
         default: "8"
         type: string
@@ -329,7 +333,7 @@ jobs:
           scope: "@${{github.repository_owner}}"
 
       - name: Setup Python environment
-        if: ${{ matrix.enabled && !matrix.container }}
+        if: ${{ matrix.enabled && !matrix.container && inputs.setup-python-enabled }}
         uses: actions/setup-python@v6.3.0
         with:
           python-version: ${{ inputs.python-version }}
@@ -508,6 +512,7 @@ jobs:
           scope: "@${{github.repository_owner}}"
 
       - name: Setup Python environment
+        if: ${{ inputs.setup-python-enabled }}
         uses: actions/setup-python@v6.3.0
         with:
           python-version: ${{ inputs.python-version }}
