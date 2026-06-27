@@ -33,6 +33,10 @@ on:
         default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0"
         type: string
         required: false
+      build-container-enabled:
+        default: true
+        type: boolean
+        required: false
       build-runner-linux:
         default: ubuntu-24.04
         type: string
@@ -236,6 +240,7 @@ jobs:
     if: >-
       ${{
         inputs.prebuild &&
+        inputs.build-container-enabled &&
         (
           github.event_name != 'pull_request' ||
           github.event.pull_request.head.repo.full_name == github.repository
@@ -438,9 +443,153 @@ jobs:
           path: |
             **/build/stage/**/*.*
 
+  build_local:
+    if: >-
+      ${{
+        inputs.prebuild &&
+        !inputs.build-container-enabled &&
+        inputs.enable-linux &&
+        (
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      }}
+    needs: prepare
+    permissions:
+      contents: read
+    concurrency:
+      group: heavy-build-${{ github.repository }}-${{ github.workflow }}-Linux-local
+      cancel-in-progress: false
+    runs-on: ${{ fromJSON(inputs.build-runner-linux-labels || format('"{0}"', inputs.build-runner-linux)) }}
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || github.token }}
+      USE_HARD_LINKS: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.0
+        with:
+          clean: true
+          persist-credentials: false
+
+      - name: Checkout Bump Version Action
+        uses: actions/checkout@v7.0.0
+        with:
+          repository: ${{ inputs.action-bump-version-repository }}
+          ref: ${{ inputs.action-bump-version-ref }}
+          path: node_modules/.github-actions/action-bump-version
+          persist-credentials: false
+
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Show Local Node
+        if: ${{ inputs.build-runner-linux-labels != '' }}
+        run: |
+          echo "runner.name=${RUNNER_NAME}"
+          echo "runner.os=${RUNNER_OS}"
+          echo "runner.arch=${RUNNER_ARCH}"
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Setup Node.js environment
+        if: ${{ inputs.build-runner-linux-labels == '' }}
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@kungfu-trader"
+
+      - name: Setup Node.js registry scope
+        if: ${{ inputs.build-runner-linux-labels == '' && inputs.publish-github-npm }}
+        uses: actions/setup-node@v6.4.0
+        with:
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@${{github.repository_owner}}"
+
+      - name: Setup Python environment
+        uses: actions/setup-python@v6.3.0
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install pipenv
+        if: ${{ inputs.use-pipenv }}
+        run: pipx install pipenv==${{ inputs.pipenv-version }}
+
+      - name: Install poetry
+        if: ${{ inputs.use-poetry }}
+        run: pipx install poetry==${{ inputs.poetry-version }}
+
+      - name: Bump Version
+        run: node node_modules/.github-actions/action-bump-version/dist/index.js
+        env:
+          KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
+          INPUT_TOKEN: ${{ github.token }}
+          INPUT_ACTION: "prebuild"
+
+      - name: Setup Build Environment
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
+          max_attempts: 3
+          command: yarn --network-timeout=1000000 install --frozen-lockfile
+          new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
+
+      - name: Build
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: ${{ inputs.build-timeout-minutes }}
+          max_attempts: ${{ inputs.max-build-attempts }}
+          command: yarn run build
+
+      - name: Upload Build Info
+        uses: actions/upload-artifact@v7.0.1
+        if: ${{ failure() }}
+        with:
+          name: "Build-Info-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
+          path: |
+            *.log
+            *.lock
+            **/*.lock
+            **/build/**/*.log
+            **/build/**/*.txt
+          if-no-files-found: ignore
+
+      - name: Package Artifacts
+        run: yarn run package
+
+      - name: Upload Package Log
+        uses: actions/upload-artifact@v7.0.1
+        if: ${{ failure() }}
+        with:
+          name: "Package-Log-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
+          path: |
+            *.log
+          if-no-files-found: ignore
+
+      - name: Upload Prebuilt (with versions)
+        if: ${{ inputs.publish-versioning }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: "Prebuilt-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
+          path: |
+            **/build/stage/*/v*/v*/*.*
+            !**/build/stage/**/.*
+            !**/build/stage/**/*.yml
+            **/build/stage/**/kungfu-update-*.yml
+            !**/build/stage/**/*.yaml
+
+      - name: Upload Prebuilt (without versions)
+        if: ${{ !inputs.publish-versioning }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: "Prebuilt-${{github.sha}}-Linux-${{github.actor}}-${{github.sha}}"
+          path: |
+            **/build/stage/**/*.*
+
   verify:
     if: ${{ always() }}
-    needs: [prepare, build]
+    needs: [prepare, build, build_local]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -539,7 +688,7 @@ jobs:
           find-dependencies: ${{ inputs.find-dependencies }}
 
       - name: Approve Merge
-        if: ${{ github.event_name == 'pull_request' && env.HAS_NODE_AUTH_TOKEN == 'true' && (!inputs.prebuild || needs.build.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
+        if: ${{ github.event_name == 'pull_request' && env.HAS_NODE_AUTH_TOKEN == 'true' && (!inputs.prebuild || needs.build.result == 'success' || needs.build_local.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
         uses: kungfu-trader/action-approve@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
