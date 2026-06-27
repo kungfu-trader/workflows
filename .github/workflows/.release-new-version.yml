@@ -83,7 +83,7 @@ on:
         required: false
     secrets:
       GITHUB_PUSH_TOKEN:
-        required: false
+        required: true
       NPM_PUSH_TOKEN:
         required: false
       AWS_CI_ACCESS_KEY_ID:
@@ -109,10 +109,16 @@ jobs:
       issues: write
       pull-requests: write
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Check GitHub push token
+        if: ${{ inputs.publish-github-npm && secrets.GITHUB_PUSH_TOKEN == '' }}
+        run: |
+          echo "::error::GITHUB_PUSH_TOKEN is required for release publishing because action-bump-version@v3 updates repository settings."
+          exit 1
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
@@ -178,7 +184,7 @@ jobs:
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
         uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"
           protect-dev-branches: ${{ inputs.protect-dev-branches }}
 
@@ -204,10 +210,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUSH_TOKEN }}
 
       - name: Rollback Check
-        if: ${{ failure() }}
+        if: ${{ failure() && secrets.GITHUB_PUSH_TOKEN != '' }}
         uses: kungfu-trader/action-rollback-release@v1
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
 
       - name: Close Issues
         if: github.event.pull_request.merged == true
@@ -250,11 +256,11 @@ jobs:
       - name: Sync Extensions Version Info To Airtable
         uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
 
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}
         uses: kungfu-trader/action-qa-automated@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
