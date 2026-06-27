@@ -2,7 +2,7 @@ on:
   workflow_call:
     inputs:
       node-version:
-        default: "16"
+        default: "24"
         type: string
         required: false
       protect-dev-branches:
@@ -110,7 +110,7 @@ on:
 jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       packages: write
@@ -120,10 +120,10 @@ jobs:
       NODE_AUTH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.0
 
       - name: Checkout Bump Version Action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.0
         with:
           repository: ${{ inputs.action-bump-version-repository }}
           ref: ${{ inputs.action-bump-version-ref }}
@@ -131,7 +131,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
@@ -139,7 +139,7 @@ jobs:
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.publish-github-npm }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6.4.0
         with:
           registry-url: "https://npm.pkg.github.com"
           scope: "@${{github.repository_owner}}"
@@ -153,7 +153,7 @@ jobs:
 
       - name: Configure AWS Crendentials (CI)
         if: ${{ inputs.publish-aws-ci }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: Configure AWS Crendentials (User)
         if: ${{ inputs.publish-aws-user }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
@@ -206,14 +206,14 @@ jobs:
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
 
       - name: Setup NPM registry for owner
         if: ${{ inputs.publish-npmjs }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://registry.npmjs.org"
@@ -247,7 +247,7 @@ jobs:
 
       - name: Convert Release Note To Pdf
         if: steps.create_release_note.outputs.has_notes == 'true'
-        uses: baileyjm02/markdown-to-pdf@v1
+        uses: baileyjm02/markdown-to-pdf@v1.2.0
         with:
           input_dir: notes
           output_dir: pdfs
@@ -261,7 +261,7 @@ jobs:
           bucket-release: ${{ inputs.bucket-release-ci }}
 
       - name: Upload Release Note
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: Release-Note-${{github.repository.name}}-${{github.sha}}
           path: |
