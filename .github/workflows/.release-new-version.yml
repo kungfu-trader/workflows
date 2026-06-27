@@ -83,7 +83,7 @@ on:
         required: false
     secrets:
       GITHUB_PUSH_TOKEN:
-        required: true
+        required: false
       NPM_PUSH_TOKEN:
         required: false
       AWS_CI_ACCESS_KEY_ID:
@@ -103,8 +103,13 @@ jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -126,7 +131,7 @@ jobs:
       - name: Bump Version
         uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           action: "prebuild"
 
       - name: Configure AWS Crendentials (CI)
@@ -141,7 +146,7 @@ jobs:
         if: ${{ inputs.publish-aws-ci }}
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           bucket-staging: ${{ inputs.bucket-staging-ci }}
           bucket-release: ${{ inputs.bucket-release-ci }}
           clean-release: ${{ inputs.clean-release-ci }}
@@ -161,7 +166,7 @@ jobs:
         if: ${{ inputs.publish-aws-user }}
         uses: kungfu-trader/action-publish-prebuilt@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           bucket-staging: ${{ inputs.bucket-staging-user }}
           bucket-release: ${{ inputs.bucket-release-user }}
           clean-release: ${{ inputs.clean-release-user }}
@@ -173,7 +178,7 @@ jobs:
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
         uses: kungfu-trader/action-bump-version@v3
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
           action: "postbuild"
           protect-dev-branches: ${{ inputs.protect-dev-branches }}
 
@@ -202,20 +207,20 @@ jobs:
         if: ${{ failure() }}
         uses: kungfu-trader/action-rollback-release@v1
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
 
       - name: Close Issues
         if: github.event.pull_request.merged == true
         uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
 
       - name: Create Release Note
         id: create_release_note
         uses: kungfu-trader/action-release-note@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
 
       - name: Convert Release Note To Pdf
@@ -229,7 +234,7 @@ jobs:
       - name: Publish Release Note To AWS
         uses: kungfu-trader/action-release-note@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           bucket-release: ${{ inputs.bucket-release-ci }}
 
@@ -245,11 +250,11 @@ jobs:
       - name: Sync Extensions Version Info To Airtable
         uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
 
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}
         uses: kungfu-trader/action-qa-automated@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ secrets.GITHUB_PUSH_TOKEN || github.token }}
