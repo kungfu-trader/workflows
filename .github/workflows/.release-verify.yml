@@ -6,7 +6,7 @@ on:
         type: boolean
         required: false
       node-version:
-        default: "16"
+        default: "24"
         type: string
         required: false
       builder-container:

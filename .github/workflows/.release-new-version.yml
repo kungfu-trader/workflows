@@ -2,7 +2,7 @@ on:
   workflow_call:
     inputs:
       node-version:
-        default: "16"
+        default: "24"
         type: string
         required: false
       protect-dev-branches:
@@ -153,7 +153,7 @@ jobs:
 
       - name: Configure AWS Crendentials (CI)
         if: ${{ inputs.publish-aws-ci }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_CI_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_CI_SECRET_ACCESS_KEY }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: Configure AWS Crendentials (User)
         if: ${{ inputs.publish-aws-user }}
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_USER_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_USER_SECRET_ACCESS_KEY }}
@@ -247,7 +247,7 @@ jobs:
 
       - name: Convert Release Note To Pdf
         if: steps.create_release_note.outputs.has_notes == 'true'
-        uses: baileyjm02/markdown-to-pdf@v1
+        uses: baileyjm02/markdown-to-pdf@v1.2.0
         with:
           input_dir: notes
           output_dir: pdfs
@@ -261,7 +261,7 @@ jobs:
           bucket-release: ${{ inputs.bucket-release-ci }}
 
       - name: Upload Release Note
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: Release-Note-${{github.repository.name}}-${{github.sha}}
           path: |
