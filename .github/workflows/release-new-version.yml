@@ -19,5 +19,3 @@ jobs:
     with:
       publish-aws-ci: false
       publish-aws-user: false
-    secrets:
-      GITHUB_PUSH_TOKEN: ${{ secrets.KUNGFU_GITHUB_TOKEN }}

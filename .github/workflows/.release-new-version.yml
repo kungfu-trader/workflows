@@ -81,9 +81,17 @@ on:
         default: "32"
         type: string
         required: false
+      action-bump-version-repository:
+        default: "kungfu-systems/action-bump-version"
+        type: string
+        required: false
+      action-bump-version-ref:
+        default: "v3"
+        type: string
+        required: false
     secrets:
       GITHUB_PUSH_TOKEN:
-        required: true
+        required: false
       NPM_PUSH_TOKEN:
         required: false
       AWS_CI_ACCESS_KEY_ID:
@@ -109,16 +117,18 @@ jobs:
       issues: write
       pull-requests: write
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PUSH_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check GitHub push token
-        if: ${{ inputs.publish-github-npm && secrets.GITHUB_PUSH_TOKEN == '' }}
-        run: |
-          echo "::error::GITHUB_PUSH_TOKEN is required for release publishing because action-bump-version@v3 updates repository settings."
-          exit 1
+      - name: Checkout Bump Version Action
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.action-bump-version-repository }}
+          ref: ${{ inputs.action-bump-version-ref }}
+          path: node_modules/.github-actions/action-bump-version
+          persist-credentials: false
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
@@ -135,7 +145,9 @@ jobs:
           scope: "@${{github.repository_owner}}"
 
       - name: Bump Version
-        uses: kungfu-trader/action-bump-version@v3
+        uses: ./node_modules/.github-actions/action-bump-version
+        env:
+          KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
         with:
           token: ${{ github.token }}
           action: "prebuild"
@@ -182,11 +194,15 @@ jobs:
 
       - name: Publish New Version To GitHub
         if: ${{ github.event.pull_request.merged && inputs.publish-github-npm }}
-        uses: kungfu-trader/action-bump-version@v3
+        uses: ./node_modules/.github-actions/action-bump-version
+        env:
+          KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ github.token }}
           action: "postbuild"
+          no-protection: "true"
           protect-dev-branches: ${{ inputs.protect-dev-branches }}
+          reset-default-branch: "false"
 
       - name: Setup NPM registry
         if: ${{ inputs.publish-npmjs }}
@@ -210,10 +226,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUSH_TOKEN }}
 
       - name: Rollback Check
-        if: ${{ failure() && secrets.GITHUB_PUSH_TOKEN != '' }}
+        if: ${{ failure() }}
         uses: kungfu-trader/action-rollback-release@v1
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Close Issues
         if: github.event.pull_request.merged == true
@@ -256,11 +272,11 @@ jobs:
       - name: Sync Extensions Version Info To Airtable
         uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
 
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}
         uses: kungfu-trader/action-qa-automated@v1.0-alpha
         with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
+          token: ${{ github.token }}
