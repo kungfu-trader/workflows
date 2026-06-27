@@ -37,12 +37,24 @@ on:
         default: ubuntu-22.04
         type: string
         required: false
+      build-runner-linux-labels:
+        default: ""
+        type: string
+        required: false
       build-runner-macos:
         default: macos-13
         type: string
         required: false
+      build-runner-macos-labels:
+        default: ""
+        type: string
+        required: false
       build-runner-windows:
         default: windows-2022
+        type: string
+        required: false
+      build-runner-windows-labels:
+        default: ""
         type: string
         required: false
       enable-linux:
@@ -166,6 +178,9 @@ jobs:
   prepare:
     runs-on: ubuntu-22.04
     container: ${{ inputs.builder-container }}
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -192,24 +207,36 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    if: ${{ inputs.prebuild }}
+    if: >-
+      ${{
+        inputs.prebuild &&
+        (
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      }}
     needs: prepare
+    permissions:
+      contents: read
+    concurrency:
+      group: heavy-build-${{ github.repository }}-${{ github.workflow }}-${{ matrix.name }}
+      cancel-in-progress: false
     strategy:
       matrix:
         include:
           - name: "Linux"
-            os: ${{ inputs.build-runner-linux }}
+            runner: ${{ inputs.build-runner-linux-labels || format('"{0}"', inputs.build-runner-linux) }}
             container: ${{ inputs.builder-container }}
             enabled: ${{ inputs.enable-linux }}
           - name: "MacOS"
-            os: ${{ inputs.build-runner-macos }}
+            runner: ${{ inputs.build-runner-macos-labels || format('"{0}"', inputs.build-runner-macos) }}
             enabled: ${{ inputs.enable-macos }}
             code-signing: ${{ inputs.code-signing-macos }}
           - name: "Windows"
-            os: ${{ inputs.build-runner-windows }}
+            runner: ${{ inputs.build-runner-windows-labels || format('"{0}"', inputs.build-runner-windows) }}
             enabled: ${{ inputs.enable-windows }}
             code-signing: ${{ inputs.code-signing-windows }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ fromJSON(matrix.runner) }}
     container: ${{ matrix.container }}
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
@@ -218,6 +245,9 @@ jobs:
       - name: Checkout
         if: ${{ matrix.enabled }}
         uses: actions/checkout@v3
+        with:
+          clean: true
+          persist-credentials: false
 
       - name: Configure Git safe directory
         if: ${{ matrix.enabled }}
@@ -359,7 +389,21 @@ jobs:
     if: ${{ always() }}
     needs: [prepare, build]
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
+      - name: Reject untrusted prebuild PR
+        if: >-
+          ${{
+            inputs.prebuild &&
+            github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name != github.repository
+          }}
+        run: |
+          echo "::error::Self-hosted prebuild is only allowed for trusted same-repository pull requests."
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -424,7 +468,7 @@ jobs:
           find-dependencies: ${{ inputs.find-dependencies }}
 
       - name: Approve Merge
-        if: ${{ !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
+        if: ${{ (!inputs.prebuild || needs.build.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
         uses: kungfu-trader/action-approve@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
