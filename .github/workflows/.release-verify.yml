@@ -111,8 +111,12 @@ jobs:
           echo "runner.name=${RUNNER_NAME}"
           echo "runner.os=${RUNNER_OS}"
           echo "runner.arch=${RUNNER_ARCH}"
+          node --version
+          npm --version
+          yarn --version
 
       - name: Setup Node.js environment
+        if: ${{ inputs.build-runner-linux-labels == '' }}
         uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
@@ -120,7 +124,7 @@ jobs:
           scope: "@kungfu-trader"
 
       - name: Setup Node.js registry scope
-        if: ${{ inputs.publish-versioning }}
+        if: ${{ inputs.build-runner-linux-labels == '' && inputs.publish-versioning }}
         uses: actions/setup-node@v6
         with:
           registry-url: "https://npm.pkg.github.com"
