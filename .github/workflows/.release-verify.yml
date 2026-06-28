@@ -253,6 +253,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
+      pull-requests: read
     concurrency:
       group: heavy-build-${{ github.repository }}-${{ github.workflow }}-${{ matrix.name }}
       cancel-in-progress: false
@@ -461,6 +462,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
+      pull-requests: read
     concurrency:
       group: heavy-build-${{ github.repository }}-${{ github.workflow }}-Linux-local
       cancel-in-progress: false
