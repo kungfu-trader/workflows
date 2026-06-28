@@ -215,6 +215,7 @@ jobs:
           'INPUT_PROTECT-DEV-BRANCHES=${{ inputs.protect-dev-branches }}'
           'INPUT_RESET-DEFAULT-BRANCH=false'
           'INPUT_SKIP-BASE-BRANCH-PUSH=true'
+          'INPUT_SKIP-CHANNEL-BRANCH-MERGE=true'
           node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
