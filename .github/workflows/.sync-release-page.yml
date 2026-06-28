@@ -55,53 +55,14 @@ on:
 
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
   sync-release-page:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.0
-
-      - name: Configure AWS Crendentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ inputs.aws-role-arn }}
-          role-session-name: github-dev
-          aws-region: ${{ inputs.aws-region }}
-
-      - name: Generate Download Page
-        if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-systems/action-generate-download-page@dev/v1/v1.0
-        with:
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          bucket-release: ${{ inputs.bucket-release }}
-          airtable-baseid: ${{ inputs.base-id }}
-
-      - name: Generate Release Page
-        uses: kungfu-systems/action-generate-release-page@dev/v1/v1.0
-        with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          product: ${{ inputs.product }}
-          repo: ${{ inputs.repo }}
-          product-name: ${{ inputs.product-name }}
-          release-path: ${{ inputs.release-path }}
-          release-url: ${{ inputs.release-url }}
-          lower-edge: ${{ inputs.lower-edge }}
-          upper-edge: ${{ inputs.upper-edge }}
-          exclude: ${{ inputs.exclude }}
-          base-id: ${{ inputs.base-id }}
-          bucket-release: ${{ inputs.bucket-release }}
-
-      - name: Publish Release Page to AWS
-        uses: kungfu-systems/action-publish-prebuilt@v2
-        with:
-          token: ${{ secrets.GITHUB_PUSH_TOKEN }}
-          artifacts-path: "dist"
-          bucket-release: ${{ inputs.bucket-release }}
-          clean-release: false
-          cloudfront-id: ${{ inputs.cloudfront-id }}
-          cloudfront-paths: /${{ inputs.release-path }}/*
+      - name: Reject retired Airtable release page sync
+        run: |
+          echo "::error::The Airtable-backed release page synchronization workflow is retired in workflows v2."
+          echo "::error::Do not route modern releases through AIRTABLE_API_KEY, base-id, or the legacy release page sync actions."
+          exit 1
