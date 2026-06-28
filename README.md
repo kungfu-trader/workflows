@@ -12,12 +12,15 @@ The v2 line is the modernized baseline for Kungfu v4 workflow work:
 - reusable workflows call `kungfu-systems/action-bump-version` v4 by default.
 - Linux heavy builds are expected to use trusted self-hosted runner labels.
 - Docker/container build paths are retired until the Docker mechanism is redesigned.
-- legacy Monday/release-note integrations are opt-in.
+- legacy Monday integration remains opt-in.
+- Airtable-backed release note generation is retired and fails fast when
+  explicitly enabled.
 - legacy collaborator, dependency discovery, and Airtable extension sync helpers
   are retired and fail fast when explicitly enabled.
 - auto-approval remains opt-in and depends on the modernized
   `kungfu-systems/action-approve` action line.
-- Airtable workflow entrypoints are retired and removed.
+- Airtable workflow entrypoints are retired; remaining compatibility stubs fail
+  fast instead of invoking Airtable-backed actions.
 - non-Airtable legacy scheduled sync and purge jobs are retired by default and
   require manual `workflow_dispatch` confirmation.
 

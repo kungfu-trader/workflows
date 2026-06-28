@@ -56,8 +56,7 @@ jobs:
           role-session-name: github-dev
           aws-region: ${{ inputs.aws-region }}
 
-      # Build inside Docker containers
-      - run: sam build --use-container
+      - run: sam build
 
   verify:
     if: ${{ always() }}
