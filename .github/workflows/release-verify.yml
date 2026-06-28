@@ -19,7 +19,7 @@ jobs:
       prebuild: false
       find-dependencies: false
       publish-versioning: false
-      action-bump-version-ref: dev/v4/v4.0
+      action-bump-version-ref: v4
   
   verify:
     # report status for branch protection rule
