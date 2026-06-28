@@ -1,12 +1,15 @@
 name: Schedule - Sync GitHub Pull Request to Airtable
 on:
-  watch:
-    types: [started]
-  schedule:
-    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      enable-legacy-sync:
+        description: 'Type enable to run the retired legacy PR sync action'
+        required: true
+        default: 'disabled'
 
 jobs:
   full-sync-pr:
+    if: ${{ github.event.inputs.enable-legacy-sync == 'enable' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: kungfu-systems/action-sync-pr@v1.0-alpha

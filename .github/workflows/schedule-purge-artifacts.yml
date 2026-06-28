@@ -1,10 +1,15 @@
 name: Schedule - Purge GitHub Artifacts
 on:
-  schedule:
-    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      enable-legacy-purge:
+        description: 'Type enable to run the retired legacy artifact purge action'
+        required: true
+        default: 'disabled'
 
 jobs:
   delete-artifacts:
+    if: ${{ github.event.inputs.enable-legacy-purge == 'enable' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: kungfu-systems/action-purge-artifacts@v1
