@@ -364,7 +364,7 @@ jobs:
 
       - name: Setup Build Environment
         if: ${{ matrix.enabled }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
           max_attempts: 3
@@ -373,7 +373,7 @@ jobs:
 
       - name: Build
         if: ${{ matrix.enabled }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.build-timeout-minutes }}
           max_attempts: ${{ inputs.max-build-attempts }}
@@ -535,7 +535,7 @@ jobs:
           INPUT_ACTION: "prebuild"
 
       - name: Setup Build Environment
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
           max_attempts: 3
@@ -543,7 +543,7 @@ jobs:
           new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
 
       - name: Build
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.build-timeout-minutes }}
           max_attempts: ${{ inputs.max-build-attempts }}
