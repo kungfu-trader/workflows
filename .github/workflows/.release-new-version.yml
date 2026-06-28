@@ -215,6 +215,7 @@ jobs:
           'INPUT_PROTECT-DEV-BRANCHES=${{ inputs.protect-dev-branches }}'
           'INPUT_RESET-DEFAULT-BRANCH=false'
           'INPUT_SKIP-BASE-BRANCH-PUSH=true'
+          'INPUT_SKIP-CHANNEL-BRANCH-MERGE=true'
           node node_modules/.github-actions/action-bump-version/dist/index.js
         env:
           KUNGFU_ACTION_BUMP_VERSION_ALLOW_LOCAL: "true"
@@ -255,39 +256,12 @@ jobs:
           token: ${{ github.token }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
 
-      - name: Create Release Note
+      - name: Reject retired Airtable release note
         if: ${{ inputs.create-release-note || inputs.publish-release-note }}
-        id: create_release_note
-        uses: kungfu-systems/action-release-note@v1.0-alpha
-        with:
-          token: ${{ github.token }}
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-
-      - name: Convert Release Note To Pdf
-        if: ${{ (inputs.create-release-note || inputs.publish-release-note) && steps.create_release_note.outputs.has_notes == 'true' }}
-        uses: baileyjm02/markdown-to-pdf@v1.2.0
-        with:
-          input_dir: notes
-          output_dir: pdfs
-          build_html: true
-
-      - name: Publish Release Note To AWS
-        if: ${{ inputs.publish-release-note }}
-        uses: kungfu-systems/action-release-note@v1.0-alpha
-        with:
-          token: ${{ github.token }}
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          bucket-release: ${{ inputs.bucket-release-ci }}
-
-      - name: Upload Release Note
-        if: ${{ inputs.create-release-note || inputs.publish-release-note }}
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: Release-Note-${{ github.event.repository.name }}-${{ github.sha }}
-          path: |
-            notes/*
-            pdfs/*
-          if-no-files-found: ignore
+        run: |
+          echo "::error::Airtable-backed release note generation is retired in workflows v2."
+          echo "::error::Do not enable create-release-note or publish-release-note until the release note mechanism is redesigned."
+          exit 1
 
       - name: Reject retired extensions Airtable sync
         if: ${{ inputs.sync-extensions-version }}
