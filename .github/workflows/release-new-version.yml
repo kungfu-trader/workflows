@@ -19,3 +19,4 @@ jobs:
     with:
       publish-aws-ci: false
       publish-aws-user: false
+      action-bump-version-ref: dev/v4/v4.0
