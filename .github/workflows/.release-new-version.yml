@@ -288,12 +288,12 @@ jobs:
             pdfs/*
           if-no-files-found: ignore
 
-      - name: Sync Extensions Version Info To Airtable
+      - name: Reject retired extensions Airtable sync
         if: ${{ inputs.sync-extensions-version }}
-        uses: kungfu-systems/action-sync-extensions-version@v1.0-alpha
-        with:
-          token: ${{ github.token }}
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+        run: |
+          echo "::error::sync-extensions-version is retired in workflows v2."
+          echo "::error::Do not route modern releases through Airtable extension version synchronization."
+          exit 1
 
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}

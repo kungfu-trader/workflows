@@ -44,12 +44,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "verify"
 
-      - name: Set Collaborators
-        uses: kungfu-systems/action-set-collaborators@v1
-        with:
-          token: ${{ secrets.NODE_AUTH_TOKEN }}
-          manager: kungfu-developers
-
   build:
       name: Build on ${{ matrix.os }} with Python ${{ matrix.python-version }}
       runs-on: ${{ matrix.os }}

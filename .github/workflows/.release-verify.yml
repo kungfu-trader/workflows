@@ -234,12 +234,12 @@ jobs:
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
 
-      - name: Set Collaborators
-        if: ${{ github.event_name == 'pull_request' && inputs.collaborator-automation-enabled && env.HAS_NODE_AUTH_TOKEN == 'true' }}
-        uses: kungfu-systems/action-set-collaborators@v1
-        with:
-          token: ${{ secrets.NODE_AUTH_TOKEN }}
-          manager: ${{ inputs.manager }}
+      - name: Reject retired collaborator automation
+        if: ${{ inputs.collaborator-automation-enabled }}
+        run: |
+          echo "::error::collaborator-automation-enabled is retired in workflows v2."
+          echo "::error::Do not route modern verification through action-set-collaborators."
+          exit 1
 
   build:
     if: >-
@@ -688,12 +688,12 @@ jobs:
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
 
-      - name: Find Dependencies
+      - name: Reject retired dependency discovery
         if: ${{ inputs.find-dependencies }}
-        uses: kungfu-systems/action-find-dependencies@v1
-        with:
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          find-dependencies: ${{ inputs.find-dependencies }}
+        run: |
+          echo "::error::find-dependencies is retired in workflows v2."
+          echo "::error::Do not route modern verification through action-find-dependencies or Airtable dependency discovery."
+          exit 1
 
       - name: Approve Merge
         if: ${{ github.event_name == 'pull_request' && inputs.auto-approve-enabled && env.HAS_NODE_AUTH_TOKEN == 'true' && (!inputs.prebuild || needs.build.result == 'success' || needs.build_local.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
