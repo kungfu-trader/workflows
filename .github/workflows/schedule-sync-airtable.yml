@@ -1,10 +1,15 @@
 name: Schedule - Sync GitHub Messages to Airtable
 on:
-  schedule:
-    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      enable-legacy-airtable-sync:
+        description: 'Type enable to run the retired legacy Airtable sync action'
+        required: true
+        default: 'disabled'
 
 jobs:
   traversal-messages:
+    if: ${{ github.event.inputs.enable-legacy-airtable-sync == 'enable' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: kungfu-systems/action-sync-airtable@v2.0-alpha
