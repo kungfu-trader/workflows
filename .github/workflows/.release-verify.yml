@@ -176,8 +176,6 @@ on:
         required: false
       NODE_AUTH_TOKEN:
         required: false
-      AIRTABLE_API_KEY:
-        required: false
       GITHUB_PUSH_TOKEN:
         required: false
       APPLE_ID:

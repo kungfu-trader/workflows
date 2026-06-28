@@ -13,12 +13,13 @@ The v2 line is the modernized baseline for Kungfu v4 workflow work:
 - Linux heavy builds are expected to use trusted self-hosted runner labels.
 - Docker/container build paths are retired until the Docker mechanism is redesigned.
 - legacy Monday/release-note integrations are opt-in.
-- legacy collaborator, dependency discovery, and AirTable extension sync helpers
+- legacy collaborator, dependency discovery, and Airtable extension sync helpers
   are retired and fail fast when explicitly enabled.
 - auto-approval remains opt-in and depends on the modernized
   `kungfu-systems/action-approve` action line.
-- legacy scheduled sync and purge jobs are retired by default and require manual
-  `workflow_dispatch` confirmation.
+- Airtable workflow entrypoints are retired and removed.
+- non-Airtable legacy scheduled sync and purge jobs are retired by default and
+  require manual `workflow_dispatch` confirmation.
 
 The lightweight validation path should use `.release-verify.yml` with
 `build-container-enabled: false` and explicit trusted runner labels. Fork pull
