@@ -77,6 +77,22 @@ on:
         default: false
         type: boolean
         required: false
+      close-issues:
+        default: false
+        type: boolean
+        required: false
+      create-release-note:
+        default: false
+        type: boolean
+        required: false
+      publish-release-note:
+        default: false
+        type: boolean
+        required: false
+      sync-extensions-version:
+        default: false
+        type: boolean
+        required: false
       max-preview-links:
         default: "32"
         type: string
@@ -86,7 +102,7 @@ on:
         type: string
         required: false
       action-bump-version-ref:
-        default: "v3"
+        default: "v4"
         type: string
         required: false
     secrets:
@@ -135,7 +151,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
-          scope: "@kungfu-trader"
+          scope: "@kungfu-systems"
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.publish-github-npm }}
@@ -161,7 +177,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (CI)
         if: ${{ inputs.publish-aws-ci }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ github.token }}
           bucket-staging: ${{ inputs.bucket-staging-ci }}
@@ -181,7 +197,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (User)
         if: ${{ inputs.publish-aws-user }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ github.token }}
           bucket-staging: ${{ inputs.bucket-staging-user }}
@@ -227,26 +243,27 @@ jobs:
 
       - name: Rollback Check
         if: ${{ failure() }}
-        uses: kungfu-trader/action-rollback-release@v1
+        uses: kungfu-systems/action-rollback-release@v1
         with:
           token: ${{ github.token }}
 
       - name: Close Issues
-        if: github.event.pull_request.merged == true
-        uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
+        if: ${{ github.event.pull_request.merged && inputs.close-issues }}
+        uses: kungfu-systems/action-merge-close-issue@v1.0-alpha
         with:
           token: ${{ github.token }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
 
       - name: Create Release Note
+        if: ${{ inputs.create-release-note || inputs.publish-release-note }}
         id: create_release_note
-        uses: kungfu-trader/action-release-note@v1.0-alpha
+        uses: kungfu-systems/action-release-note@v1.0-alpha
         with:
           token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
 
       - name: Convert Release Note To Pdf
-        if: steps.create_release_note.outputs.has_notes == 'true'
+        if: ${{ (inputs.create-release-note || inputs.publish-release-note) && steps.create_release_note.outputs.has_notes == 'true' }}
         uses: baileyjm02/markdown-to-pdf@v1.2.0
         with:
           input_dir: notes
@@ -254,13 +271,15 @@ jobs:
           build_html: true
 
       - name: Publish Release Note To AWS
-        uses: kungfu-trader/action-release-note@v1.0-alpha
+        if: ${{ inputs.publish-release-note }}
+        uses: kungfu-systems/action-release-note@v1.0-alpha
         with:
           token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           bucket-release: ${{ inputs.bucket-release-ci }}
 
       - name: Upload Release Note
+        if: ${{ inputs.create-release-note || inputs.publish-release-note }}
         uses: actions/upload-artifact@v7.0.1
         with:
           name: Release-Note-${{ github.event.repository.name }}-${{ github.sha }}
@@ -269,14 +288,15 @@ jobs:
             pdfs/*
           if-no-files-found: ignore
 
-      - name: Sync Extensions Version Info To Airtable
-        uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
-        with:
-          token: ${{ github.token }}
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
+      - name: Reject retired extensions Airtable sync
+        if: ${{ inputs.sync-extensions-version }}
+        run: |
+          echo "::error::sync-extensions-version is retired in workflows v2."
+          echo "::error::Do not route modern releases through Airtable extension version synchronization."
+          exit 1
 
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}
-        uses: kungfu-trader/action-qa-automated@v1.0-alpha
+        uses: kungfu-systems/action-qa-automated@v1.0-alpha
         with:
           token: ${{ github.token }}

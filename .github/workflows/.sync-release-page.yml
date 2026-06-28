@@ -60,10 +60,10 @@ permissions:
 
 jobs:
   sync-release-page:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.0
 
       - name: Configure AWS Crendentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -74,14 +74,14 @@ jobs:
 
       - name: Generate Download Page
         if: ${{ github.event.pull_request.merged }}
-        uses: kungfu-trader/action-generate-download-page@dev/v1/v1.0
+        uses: kungfu-systems/action-generate-download-page@dev/v1/v1.0
         with:
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
           bucket-release: ${{ inputs.bucket-release }}
           airtable-baseid: ${{ inputs.base-id }}
 
       - name: Generate Release Page
-        uses: kungfu-trader/action-generate-release-page@dev/v1/v1.0
+        uses: kungfu-systems/action-generate-release-page@dev/v1/v1.0
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
@@ -97,7 +97,7 @@ jobs:
           bucket-release: ${{ inputs.bucket-release }}
 
       - name: Publish Release Page to AWS
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           artifacts-path: "dist"
