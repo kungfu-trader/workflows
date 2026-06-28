@@ -86,7 +86,7 @@ on:
         type: string
         required: false
       action-bump-version-ref:
-        default: "v3"
+        default: "v4"
         type: string
         required: false
     secrets:
@@ -135,7 +135,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
-          scope: "@kungfu-trader"
+          scope: "@kungfu-systems"
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.publish-github-npm }}
@@ -161,7 +161,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (CI)
         if: ${{ inputs.publish-aws-ci }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ github.token }}
           bucket-staging: ${{ inputs.bucket-staging-ci }}
@@ -181,7 +181,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (User)
         if: ${{ inputs.publish-aws-user }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ github.token }}
           bucket-staging: ${{ inputs.bucket-staging-user }}
@@ -227,20 +227,20 @@ jobs:
 
       - name: Rollback Check
         if: ${{ failure() }}
-        uses: kungfu-trader/action-rollback-release@v1
+        uses: kungfu-systems/action-rollback-release@v1
         with:
           token: ${{ github.token }}
 
       - name: Close Issues
         if: github.event.pull_request.merged == true
-        uses: kungfu-trader/action-merge-close-issue@v1.0-alpha
+        uses: kungfu-systems/action-merge-close-issue@v1.0-alpha
         with:
           token: ${{ github.token }}
           monday_api_key: ${{ secrets.MONDAY_API_KEY }}
 
       - name: Create Release Note
         id: create_release_note
-        uses: kungfu-trader/action-release-note@v1.0-alpha
+        uses: kungfu-systems/action-release-note@v1.0-alpha
         with:
           token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
@@ -254,7 +254,7 @@ jobs:
           build_html: true
 
       - name: Publish Release Note To AWS
-        uses: kungfu-trader/action-release-note@v1.0-alpha
+        uses: kungfu-systems/action-release-note@v1.0-alpha
         with:
           token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
@@ -270,13 +270,13 @@ jobs:
           if-no-files-found: ignore
 
       - name: Sync Extensions Version Info To Airtable
-        uses: kungfu-trader/action-sync-extensions-version@v1.0-alpha
+        uses: kungfu-systems/action-sync-extensions-version@v1.0-alpha
         with:
           token: ${{ github.token }}
           apiKey: ${{ secrets.AIRTABLE_API_KEY }}
 
       - name: Trigger Qa Automated
         if: ${{ inputs.need-qa-automated }}
-        uses: kungfu-trader/action-qa-automated@v1.0-alpha
+        uses: kungfu-systems/action-qa-automated@v1.0-alpha
         with:
           token: ${{ github.token }}
