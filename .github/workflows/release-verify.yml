@@ -8,9 +8,6 @@ on:
       - release/*/*
       - main
 
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-
 permissions:
   contents: read
   pull-requests: write
@@ -20,10 +17,9 @@ jobs:
     uses: ./.github/workflows/.release-verify.yml
     with:
       prebuild: false
-      check-format: false
-      find-dependencies: true
-    secrets:
-      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+      find-dependencies: false
+      publish-versioning: false
+      action-bump-version-ref: dev/v4/v4.0
   
   verify:
     # report status for branch protection rule

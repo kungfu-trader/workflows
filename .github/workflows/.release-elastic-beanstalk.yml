@@ -21,14 +21,14 @@ on:
 jobs:
   release:
     if: ${{ github.event.pull_request.merged }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7.0.0
 
       - name: Bump Version
         id: bump_version
-        uses: kungfu-trader/action-bump-version@v3
+        uses: kungfu-systems/action-bump-version@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           action: "prebuild"
@@ -50,7 +50,7 @@ jobs:
           wait_for_environment_recovery: 120
 
       - name: Publish New Version To GitHub
-        uses: kungfu-trader/action-bump-version@v3
+        uses: kungfu-systems/action-bump-version@v4
         with:
           token: ${{ secrets.GITHUB_PUSH_TOKEN }}
           action: "postbuild"

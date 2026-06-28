@@ -29,16 +29,12 @@ on:
         default: "1.6.1"
         type: string
         required: false
-      check-format:
-        default: true
-        type: boolean
-        required: false
       builder-container:
-        default: "docker.io/kungfutrader/kungfu-builder-ubuntu:v1.0.0"
+        default: ""
         type: string
         required: false
       build-container-enabled:
-        default: true
+        default: false
         type: boolean
         required: false
       build-runner-linux:
@@ -149,6 +145,14 @@ on:
         default: false 
         type: boolean
         required: false
+      collaborator-automation-enabled:
+        default: false
+        type: boolean
+        required: false
+      auto-approve-enabled:
+        default: false
+        type: boolean
+        required: false
       manager:
         default: "kungfu-developers"
         type: string
@@ -158,7 +162,7 @@ on:
         type: string
         required: false
       action-bump-version-ref:
-        default: "v3"
+        default: "v4"
         type: string
         required: false
     secrets:
@@ -171,8 +175,6 @@ on:
       AWS_USER_SECRET_ACCESS_KEY:
         required: false
       NODE_AUTH_TOKEN:
-        required: false
-      AIRTABLE_API_KEY:
         required: false
       GITHUB_PUSH_TOKEN:
         required: false
@@ -187,13 +189,9 @@ on:
       WINDOWS_CSC_KEY:
         required: false
 
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-
 jobs:
   prepare:
     runs-on: ubuntu-24.04
-    container: ${{ inputs.builder-container }}
     permissions:
       contents: read
       pull-requests: write
@@ -208,14 +206,15 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
+      - name: Reject retired container build path
+        if: ${{ inputs.build-container-enabled || inputs.builder-container != '' }}
+        run: |
+          echo "::error::The workflows v2 Docker/container build path is retired."
+          echo "::error::Use build-container-enabled=false and self-hosted runner labels until the Docker mechanism is redesigned."
+          exit 1
+
       - name: Configure Git safe directory
         run: git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
-
-      - name: Check Format
-        if: ${{ inputs.check-format }}
-        uses: kungfu-trader/action-check-format@v1
-        with:
-          token: ${{ github.token }}
 
       - name: Checkout Bump Version Action
         uses: actions/checkout@v7.0.0
@@ -233,17 +232,18 @@ jobs:
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
 
-      - name: Set Collaborators
-        if: ${{ github.event_name == 'pull_request' && env.HAS_NODE_AUTH_TOKEN == 'true' }}
-        uses: kungfu-trader/action-set-collaborators@v1
-        with:
-          token: ${{ secrets.NODE_AUTH_TOKEN }}
-          manager: ${{ inputs.manager }}
+      - name: Reject retired collaborator automation
+        if: ${{ inputs.collaborator-automation-enabled }}
+        run: |
+          echo "::error::collaborator-automation-enabled is retired in workflows v2."
+          echo "::error::Do not route modern verification through action-set-collaborators."
+          exit 1
 
   build:
     if: >-
       ${{
         inputs.prebuild &&
+        false &&
         inputs.build-container-enabled &&
         (
           github.event_name != 'pull_request' ||
@@ -323,7 +323,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
-          scope: "@kungfu-trader"
+          scope: "@kungfu-systems"
 
       - name: Setup Node.js registry scope
         if: ${{ matrix.enabled && !matrix.local-node && inputs.publish-github-npm }}
@@ -362,7 +362,7 @@ jobs:
 
       - name: Setup Build Environment
         if: ${{ matrix.enabled }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
           max_attempts: 3
@@ -371,7 +371,7 @@ jobs:
 
       - name: Build
         if: ${{ matrix.enabled }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.build-timeout-minutes }}
           max_attempts: ${{ inputs.max-build-attempts }}
@@ -502,7 +502,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           registry-url: "https://npm.pkg.github.com"
-          scope: "@kungfu-trader"
+          scope: "@kungfu-systems"
 
       - name: Setup Node.js registry scope
         if: ${{ inputs.build-runner-linux-labels == '' && inputs.publish-github-npm }}
@@ -533,7 +533,7 @@ jobs:
           INPUT_ACTION: "prebuild"
 
       - name: Setup Build Environment
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.setup-env-timeout-minutes }}
           max_attempts: 3
@@ -541,7 +541,7 @@ jobs:
           new_command_on_retry: yarn --network-timeout=5000000 install --frozen-lockfile
 
       - name: Build
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v4.0.0
         with:
           timeout_minutes: ${{ inputs.build-timeout-minutes }}
           max_attempts: ${{ inputs.max-build-attempts }}
@@ -653,7 +653,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (CI)
         if: ${{ inputs.prebuild && inputs.publish-aws-ci }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ github.token }}
           artifacts-path: "github-artifacts"
@@ -670,7 +670,7 @@ jobs:
 
       - name: Publish Prebuilt to AWS (User)
         if: ${{ inputs.prebuild && inputs.publish-aws-user }}
-        uses: kungfu-trader/action-publish-prebuilt@v2
+        uses: kungfu-systems/action-publish-prebuilt@v2
         with:
           token: ${{ github.token }}
           artifacts-path: "github-artifacts"
@@ -686,14 +686,15 @@ jobs:
           INPUT_TOKEN: ${{ github.token }}
           INPUT_ACTION: "verify"
 
-      - name: Find Dependencies
-        uses: kungfu-trader/action-find-dependencies@v1
-        with:
-          apiKey: ${{ secrets.AIRTABLE_API_KEY }}
-          find-dependencies: ${{ inputs.find-dependencies }}
+      - name: Reject retired dependency discovery
+        if: ${{ inputs.find-dependencies }}
+        run: |
+          echo "::error::find-dependencies is retired in workflows v2."
+          echo "::error::Do not route modern verification through action-find-dependencies or Airtable dependency discovery."
+          exit 1
 
       - name: Approve Merge
-        if: ${{ github.event_name == 'pull_request' && env.HAS_NODE_AUTH_TOKEN == 'true' && (!inputs.prebuild || needs.build.result == 'success' || needs.build_local.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
-        uses: kungfu-trader/action-approve@v1
+        if: ${{ github.event_name == 'pull_request' && inputs.auto-approve-enabled && env.HAS_NODE_AUTH_TOKEN == 'true' && (!inputs.prebuild || needs.build.result == 'success' || needs.build_local.result == 'success') && !contains(join(needs.*.result, ','), 'failure') && !contains(join(needs.*.result, ','), 'cancelled') }}
+        uses: kungfu-systems/action-approve@v1
         with:
           token: ${{ secrets.NODE_AUTH_TOKEN }}
